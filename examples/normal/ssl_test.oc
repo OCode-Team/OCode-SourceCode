@@ -1,0 +1,27 @@
+say "=== Test 1: ssl_socket + ssl_send + ssl_receive (HTTPS GET example.com) ==="
+
+let sock be ssl_socket "example.com" 443
+say "opened SSL socket handle: " + sock
+
+let request be "GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\nUser-Agent: OCode\r\n\r\n"
+let sent be ssl_send sock request
+say "sent " + sent + " bytes"
+
+let response be ""
+let loop_count be 0
+while loop_count < 30
+    let chunk be ssl_receive sock 4096
+    if length of chunk == 0
+        break
+    end
+    let response be response + chunk
+    let loop_count be loop_count + 1
+end
+
+say "received " + length of response + " bytes total"
+say "first 200 chars:"
+say slice response from 0 to 200
+say ""
+
+ssl_close sock
+say "socket closed"

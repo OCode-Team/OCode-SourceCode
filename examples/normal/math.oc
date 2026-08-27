@@ -1,0 +1,25 @@
+# math.oc - built-in math operations
+
+let neg be -42
+say abs of neg          # 42
+say round of 3.7        # 4
+say floor of 3.9        # 3
+say ceil of 3.1         # 4
+say sqrt of 16          # 4
+say power 2 to 10       # 1024
+
+say min of 5 and 3      # 3
+say max of 5 and 3      # 5
+
+let nums be [4, 1, 7, 2]
+say min of nums         # 1
+say max of nums         # 7
+
+# modulo
+say 17 mod 5            # 2
+say 17 remainder 5      # 2
+say 17 % 5              # 2
+
+# random number between 1 and 100
+let r be random from 1 to 100
+say r

@@ -1,0 +1,10 @@
+let n be to_number of "42"
+say n + 8   # 50
+
+let s be to_string of 100
+say s + " dollars"
+
+say is_number of 3.14    # true
+say is_string of "hi"    # true
+say is_list of [1,2,3]   # true
+say is_bool of true      # true

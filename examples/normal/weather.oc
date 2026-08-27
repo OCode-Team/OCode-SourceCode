@@ -1,0 +1,91 @@
+# weather.oc — a real CLI tool built with v12.
+#
+# Usage:
+#     ocode weather.oc <city>
+#     ocode weather.oc London
+#     ocode weather.oc "New York"
+#
+# Demonstrates: CLI args (args), try/catch, parse_json, dicts, fetch (HTTP),
+# string concatenation, conditionals, formatted output.
+#
+# Uses the free open-meteo API (no API key needed).
+
+define main with _
+    # --- Read the city from CLI args ---
+    let city be ""
+    if length of args is greater than 1
+        let city be args at 1
+    end
+
+    if city is equal to ""
+        say "Usage: ocode weather.oc <city>"
+        say "  e.g. ocode weather.oc London"
+        say "       ocode weather.oc \"New York\""
+        return
+    end
+
+    say "Looking up weather for: " + city + "..."
+    say ""
+
+    # --- Try-catch wraps the whole pipeline so any network/parse failure
+    # gives a clean message instead of an OCode stack trace. ---
+    try
+        let geo_url be "https://geocoding-api.open-meteo.com/v1/search?name=" + city + "&count=1"
+        let geo_resp be fetch geo_url
+        let geo be parse_json of geo_resp
+
+        let results be geo at "results"
+        if length of results is equal to 0
+            say "City '" + city + "' not found."
+            return
+        end
+
+        let first be results at 0
+        let lat be first at "latitude"
+        let lon be first at "longitude"
+        let name be first at "name"
+        let country be first at "country"
+
+        say "Found: " + name + ", " + country
+        say "  lat=" + to_string of lat + " lon=" + to_string of lon
+        say ""
+
+        # --- Step 2: fetch the actual weather for those coordinates ---
+        let w_url be "https://api.open-meteo.com/v1/forecast?latitude=" + to_string of lat + "&longitude=" + to_string of lon + "&current=temperature_2m,wind_speed_10m,weather_code"
+        let w_resp be fetch w_url
+        let w be parse_json of w_resp
+
+        let cur be w at "current"
+        let temp be cur at "temperature_2m"
+        let wind be cur at "wind_speed_10m"
+        let code be cur at "weather_code"
+
+        # Map the WMO weather code to a human-readable description
+        let desc be "unknown"
+        if code is equal to 0
+            let desc be "Clear sky"
+        else if code is greater than 0 and code is less than 4
+            let desc be "Partly cloudy"
+        else if code is greater than 44 and code is less than 49
+            let desc be "Foggy"
+        else if code is greater than 50 and code is less than 60
+            let desc be "Drizzle"
+        else if code is greater than 60 and code is less than 70
+            let desc be "Rain"
+        else if code is greater than 70 and code is less than 80
+            let desc be "Snow"
+        else if code is greater than 94
+            let desc be "Thunderstorm"
+        end
+
+        say "Current weather for " + name + ", " + country + ":"
+        say "  Temperature: " + to_string of temp + " C"
+        say "  Wind:        " + to_string of wind + " km/h"
+        say "  Conditions:  " + desc
+
+    catch ERR
+        say "Could not fetch weather: " + ERR
+    end
+end
+
+main with 0

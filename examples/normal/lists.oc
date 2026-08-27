@@ -1,0 +1,30 @@
+let nums be [10, 20, 30]
+say nums at 0
+say length of nums
+
+add 40 to nums
+say nums at 3
+
+# remove at index
+remove at 0 from nums
+say nums     # [20, 30, 40]
+
+# for each
+for each n in nums
+    say n * 2
+end
+
+# sort
+let mixed be [5, 1, 4, 2, 3]
+let sorted be sort mixed
+say sorted
+
+# reverse
+say reverse [1, 2, 3]
+
+# slice
+let letters be ["a","b","c","d","e"]
+say slice letters from 1 to 4   # ["b","c","d"]
+
+# contains
+say contains nums 30   # true

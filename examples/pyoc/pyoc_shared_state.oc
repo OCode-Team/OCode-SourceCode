@@ -1,0 +1,57 @@
+# pyoc_shared_state.oc — Imports persist, variables persist, no file hacks needed!
+# Before pyoc, sharing state between blocks required temp files.
+# In v6, the Python process stays alive and OCode syntax is auto-translated — everything just works.
+
+say "=== Step 1: Set up data using OCode syntax inside pyoc ==="
+
+pyoc
+import json
+
+let data be {"users": [{"name": "Alice", "score": 95}, {"name": "Bob", "score": 82}, {"name": "Charlie", "score": 78}]}
+let scores be [u["score"] for u in data["users"]]
+let avg be sum(scores) / len(scores)
+
+say "Average score: " + str(avg)
+// Using raw Python for lambda since 'with' isn't a translation keyword
+top = max(data["users"], key=lambda u: u["score"])
+print(f"Top student:  {top['name']} ({top['score']})")
+end
+
+say ""
+say "=== Step 2: OCode continues ==="
+say "Python variables are still alive..."
+say ""
+
+say "=== Step 3: Access same data, add a user ==="
+
+pyoc
+// data, scores, avg, top — all still here!
+say "We had " + str(len(scores)) + " students"
+
+// add translates to .append()
+add {"name": "Diana", "score": 99} to data["users"]
+
+let new_scores be [u["score"] for u in data["users"]]
+let new_avg be sum(new_scores) / len(new_scores)
+say "New average after adding Diana: " + str(new_avg)
+end
+
+say ""
+say "=== Step 4: Import in one block, use in many ==="
+
+pyoc
+import math
+let result be math.factorial(20)
+say "20! = " + str(result)
+end
+
+pyoc
+// math is still imported, result is still here
+let log_val be math.log(result)
+say "log(20!) = " + str(round(log_val, 4))
+let digits be len(str(result))
+say "Digits in 20!: " + str(digits)
+end
+
+say ""
+say "Done — no temp files, one Python process, everything persists!"

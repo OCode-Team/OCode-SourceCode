@@ -1,0 +1,108 @@
+# HTTP / HTTPS examples — v9
+#
+# v9 ships with one easy HTTP keyword (`fetch`) plus raw TCP sockets.
+# HTTPS is supported natively via OpenSSL.
+#
+# Syntax summary:
+#   fetch URL                                → body         (GET)
+#   fetch URL with BODY                      → body         (POST)
+#   fetch URL with METHOD, BODY, HEADERS     → [status, body, headers]
+#
+# The old http_get / http_post / http_request names still work too.
+
+# --- 1. Simple GET (HTTP) ------------------------------------------------
+say "GET httpbin.org/json:"
+let body be fetch "http://httpbin.org/json"
+say slice body from 0 to 80
+say ""
+
+
+# --- 2. POST with form data (HTTP) ---------------------------------------
+say "POST httpbin.org/post with form fields:"
+let resp be fetch "http://httpbin.org/post" with "name=OCode&version=9"
+say slice resp from 0 to 80
+say ""
+
+
+# --- 3. Full request: status + body + headers ----------------------------
+say "Full request via fetch with 4 args:"
+let r be fetch "http://httpbin.org/get" with "GET", "", []
+say "status code: " + to_string of r at 0
+say "body length: " + to_string of length of r at 1
+let headerLines be split r at 2 by "\r\n"
+say "first response header line:"
+say headerLines at 0
+say ""
+
+
+# --- 4. Custom headers (4-arg fetch) -------------------------------------
+say "GET with a custom X-Custom-Header:"
+let hdrs be [["X-Custom-Header", "hello-from-ocode"], ["Accept", "application/json"]]
+let r2 be fetch "http://httpbin.org/headers" with "GET", "", hdrs
+say r2 at 1
+say ""
+
+
+# --- 5. HTTPS! (since v8) ------------------------------------------------
+# https:// URLs work natively via OpenSSL — no pyoc bridge needed.
+say "HTTPS GET https://example.com:"
+let secure be fetch "https://example.com"
+say slice secure from 0 to 120
+say ""
+
+
+# --- 6. HTTPS POST -------------------------------------------------------
+say "HTTPS POST https://httpbin.org/post:"
+let r3 be fetch "https://httpbin.org/post" with "hello=tls"
+say slice r3 from 0 to 100
+say ""
+
+
+# --- 7. HTTPS with custom headers + status code --------------------------
+say "HTTPS with custom headers, check status:"
+let r4 be fetch "https://httpbin.org/headers" with "GET", "", hdrs
+say "status: " + to_string of r4 at 0
+let b4 be r4 at 1
+say "body snippet: " + slice b4 from 0 to 100
+say ""
+
+
+# --- 8. PUT / DELETE / other methods -------------------------------------
+say "PUT and DELETE over HTTPS:"
+let put be fetch "https://httpbin.org/put" with "PUT", "payload=42", []
+say "PUT status: " + to_string of put at 0
+let del be fetch "https://httpbin.org/delete" with "DELETE", "", []
+say "DELETE status: " + to_string of del at 0
+say ""
+
+
+# --- 9. Slice a web page ------------------------------------------------
+say "First 200 chars of https://example.com:"
+let page be fetch "https://example.com"
+say slice page from 0 to 200
+say ""
+
+
+# --- 10. Raw TCP socket — speak HTTP/1.0 by hand -------------------------
+# v9 gives you raw TCP sockets. Open one with `socket HOST PORT`,
+# then `send` bytes, `receive` or `readline` the reply, and `close`.
+say "Raw TCP socket to example.com:80:"
+let s be socket "example.com" 80
+send s "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n"
+let statusLine be readline s
+say "status: " + statusLine
+let head be receive s 200
+say "next 200 bytes:"
+say head
+close s
+say ""
+
+
+# --- 11. TCP echo (daytime protocol on port 13) --------------------------
+# Many public servers still speak the classic text protocols.
+# `receive` with a byte cap returns whatever is available up to that cap.
+say "TCP daytime from time.nist.gov:13:"
+let s2 be socket "time.nist.gov" 13
+let t be receive s2 128
+say "daytime: " + t
+close s2

@@ -1,0 +1,45 @@
+# pyoc_pypi.oc — pyoc bridge with PyPI packages (auto-installed)
+# The persistent session means you only import once!
+# ocd install <pkg> also works — unified package manager for .oc and PyPI.
+
+say "=== PyPI: cowsay (auto-installed) ==="
+
+pyoc
+import cowsay
+cowsay.cow("OCode loves Python!")
+end
+
+say ""
+say "=== PyPI: requests (HTTP from the web) ==="
+say "Fetching a random joke..."
+
+pyoc
+// cowsay is still available, and requests is auto-installed
+import requests
+let r be requests.get("https://official-joke-api.appspot.com/random_joke")
+let data be r.json()
+say data['setup']
+say data['punchline']
+end
+
+say ""
+say "=== PyPI: rich (beautiful terminal output) ==="
+
+pyoc
+// Both cowsay and requests are still in memory
+from rich import print as rprint
+from rich.table import Table
+
+table = Table(title="OCode v6 Features")
+table.add_column("Feature", style="cyan")
+table.add_column("Status", style="green")
+table.add_row("pyoc Bridge", "Active")
+table.add_row("Persistent Session", "Active")
+table.add_row("Auto PyPI Install", "Active")
+table.add_row("ocd (unified)", ".oc + PyPI")
+table.add_row("OCode→Python Translation", "Active")
+rprint(table)
+end
+
+say ""
+say "All packages auto-installed — one Python process the whole time!"

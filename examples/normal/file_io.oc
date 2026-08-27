@@ -1,0 +1,84 @@
+# File I/O examples — v10
+#
+# Eight builtins for working with files and directories:
+#   read PATH                            → string (whole file contents)
+#   readlines PATH                       → list of strings (lines, no \n)
+#   write PATH with CONTENT              → 0 (overwrite file)
+#   append PATH with CONTENT             → 0 (append to file)
+#   ls PATH                              → list of names in a directory
+#   exists PATH                          → true / false
+#   mkdir PATH                           → 0 (create directory)
+#   rm PATH                              → 0 (remove file)
+#
+# All paths work on both Linux/macOS (forward slashes) and Windows
+# (forward slashes work everywhere, no need for backslashes).
+# Errors (missing file, permission denied, etc.) raise a clean
+# `OCode error (line N): ...` and stop the program.
+
+
+# --- 1. write a file, then read it back ---------------------------------
+say "1. write + read:"
+write "ocode_demo.txt" with "hello from OCode\nsecond line\nthird line\n"
+let txt be read "ocode_demo.txt"
+say "  read back: " + txt
+say ""
+
+
+# --- 2. readlines — get a list of lines ---------------------------------
+say "2. readlines:"
+let lines be readlines "ocode_demo.txt"
+say "  " + to_string of length of lines + " lines"
+say "  line 0: " + lines at 0
+say "  line 1: " + lines at 1
+say "  line 2: " + lines at 2
+say ""
+
+
+# --- 3. append — add more lines -----------------------------------------
+say "3. append:"
+append "ocode_demo.txt" with "fourth line (appended)\n"
+append "ocode_demo.txt" with "fifth line (also appended)\n"
+let lines2 be readlines "ocode_demo.txt"
+say "  now " + to_string of length of lines2 + " lines"
+say "  line 3: " + lines2 at 3
+say ""
+
+
+# --- 4. exists — check before reading -----------------------------------
+say "4. exists:"
+say "  ocode_demo.txt exists? " + to_string of exists "ocode_demo.txt"
+say "  missing.txt exists?    " + to_string of exists "missing.txt"
+say ""
+
+
+# --- 5. mkdir + ls — work with directories ------------------------------
+say "5. mkdir + ls:"
+mkdir "ocode_demo_dir"
+write "ocode_demo_dir/a.txt" with "aaa"
+write "ocode_demo_dir/b.txt" with "bbb"
+write "ocode_demo_dir/c.oc" with "say 1"
+let entries be ls "ocode_demo_dir"
+say "  entries in ocode_demo_dir: " + join entries by ", "
+say ""
+
+
+# --- 6. rm — clean up ---------------------------------------------------
+say "6. rm cleanup:"
+rm "ocode_demo_dir/a.txt"
+rm "ocode_demo_dir/b.txt"
+rm "ocode_demo_dir/c.oc"
+rm "ocode_demo.txt"
+say "  ocode_demo.txt exists after rm? " + to_string of exists "ocode_demo.txt"
+say "  (dir itself still exists — OCode's rm only removes files)"
+
+
+# --- 7. Combine with fetch: download a webpage, save, re-read -----------
+# (uncomment when you have network access)
+#
+# say "7. fetch + write + readlines:"
+# let html be fetch "https://example.com"
+# write "page.html" with html
+# let lines be readlines "page.html"
+# say "  saved " + to_string of length of html + " chars, "
+# say "  " + to_string of length of lines + " lines"
+# rm "page.html"

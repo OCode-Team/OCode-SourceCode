@@ -1,0 +1,50 @@
+# pyoc_basic.oc — pyoc bridge basics using Python standard library
+# pyoc blocks share one persistent Python process.
+# Imports and variables persist across blocks!
+# OCode syntax (say, let, //) is auto-translated to Python inside pyoc blocks.
+
+say "=== pyoc stdlib: json ==="
+
+pyoc
+import json
+let data be {"name": "OCode", "version": 6, "features": ["fast", "easy", "pyoc bridge", "ocode translation"]}
+print(json.dumps(data, indent=2)) // OCode // comments become # comments
+end
+
+say ""
+say "=== pyoc stdlib: datetime ==="
+
+pyoc
+// json is still imported from block 1 — no need to re-import!
+from datetime import datetime
+let now be datetime.now()
+let time_str be now.strftime('%Y-%m-%d %H:%M:%S')
+say "Current time: " + time_str
+end
+
+say ""
+say "=== pyoc stdlib: math ==="
+
+pyoc
+// datetime is still available, and now math too
+import math
+say "Pi:  " + str(math.pi)
+say "e:   " + str(math.e)
+let sine_val be math.sin(math.pi / 2)
+say "sin(pi/2): " + str(sine_val)
+let root be math.sqrt(144)
+say "sqrt(144):  " + str(root)
+end
+
+say ""
+say "=== pyoc stdlib: os ==="
+
+pyoc
+import os
+say "Current directory: " + os.getcwd()
+say "Home directory:   " + os.path.expanduser('~')
+end
+
+say ""
+say "All pyoc blocks ran in ONE Python process — no restarts!"
+say "OCode syntax (say, let, //) was auto-translated to Python inside each block."

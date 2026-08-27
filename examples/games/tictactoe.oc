@@ -1,0 +1,536 @@
+# =============================================================
+#  OCode Tic-Tac-Toe  v2.1
+#  Modes: 1) vs Bot Easy  2) vs Bot Hard (minimax)  3) vs Friend
+#
+#  New in v2.1:
+#    * Uses the new `chr of N` builtin (OCode v11) to construct the
+#      ANSI escape byte — `let ESC be chr of 27` — instead of embedding
+#      a raw non-printable byte in the source. This means colors now
+#      ACTUALLY render in the terminal.
+#
+#  New in v2.0:
+#    * Players choose their letter (X or O) at the start of every
+#      round. Whoever picks X always goes first.
+#    * Bot can play either letter (minimax is generalized).
+#    * Fixed bug where the bot's move was silently dropped
+#      (random returns a float; we now floor it to an int).
+#    * Fixed bug where the bot appeared to move twice — caused
+#      by the dropped move above and by the loop continuing
+#      without a visible board redraw.
+#
+#  Cell numbering (row-major, 1-9):
+#       1 | 2 | 3
+#       4 | 5 | 6
+#       7 | 8 | 9
+#
+#  Fancy UI: ANSI colors + box-drawing characters.
+# =============================================================
+
+# --- ANSI escape constants ---
+# We use chr of 27 to build the ESC byte. OCode's string lexer
+# strips raw non-printable bytes from string literals, so we MUST
+# construct ESC programmatically — `chr of 27` returns the ESC
+# character as a 1-character string, which can then be concatenated
+# with ANSI control sequences.
+let ESC be chr of 27
+let CLEAR be ESC + "[2J" + ESC + "[H"
+let RED be ESC + "[31m"
+let GREEN be ESC + "[32m"
+let YELLOW be ESC + "[33m"
+let BLUE be ESC + "[34m"
+let MAGENTA be ESC + "[35m"
+let CYAN be ESC + "[36m"
+let DIM be ESC + "[90m"
+let BOLD be ESC + "[1m"
+let RESET be ESC + "[0m"
+
+# --- Board helpers ---
+# Board is a 9-element list of strings: " ", "X", or "O".
+# Index 0 = top-left, 8 = bottom-right.
+
+define new_board with _
+    return [" ", " ", " ", " ", " ", " ", " ", " ", " "]
+end
+
+define set_cell with board, i, val
+    let out be []
+    let j be 0
+    while j is less than 9
+        if j is equal to i
+            add val to out
+        else
+            add board at j to out
+        end
+        let j be j + 1
+    end
+    return out
+end
+
+define cell_empty with board, i
+    if board at i is equal to " "
+        return true
+    end
+    return false
+end
+
+define is_full with board
+    let i be 0
+    while i is less than 9
+        if board at i is equal to " "
+            return false
+        end
+        let i be i + 1
+    end
+    return true
+end
+
+# Returns "X", "O", "draw", or " " (ongoing)
+define check_winner with board
+    let lines be [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+    for each line in lines
+        let a be line at 0
+        let b be line at 1
+        let c be line at 2
+        let va be board at a
+        let vb be board at b
+        let vc be board at c
+        if va is not equal to " "
+            if va is equal to vb
+                if vb is equal to vc
+                    return va
+                end
+            end
+        end
+    end
+    if is_full with board
+        return "draw"
+    end
+    return " "
+end
+
+# Returns the opposite letter: "X" -> "O", "O" -> "X"
+define other_letter with L
+    if L is equal to "X"
+        return "O"
+    end
+    return "X"
+end
+
+# --- Display ---
+
+define clear_screen with _
+    say CLEAR
+end
+
+# Color a cell value for display.
+# X = cyan, O = yellow, empty = dimmed cell number
+define cell_display with board, i
+    let v be board at i
+    if v is equal to "X"
+        return CYAN + BOLD + "X" + RESET
+    end
+    if v is equal to "O"
+        return YELLOW + BOLD + "O" + RESET
+    end
+    let n be i + 1
+    return DIM + to_string of n + RESET
+end
+
+define print_board with board
+    let c0 be cell_display with board, 0
+    let c1 be cell_display with board, 1
+    let c2 be cell_display with board, 2
+    let c3 be cell_display with board, 3
+    let c4 be cell_display with board, 4
+    let c5 be cell_display with board, 5
+    let c6 be cell_display with board, 6
+    let c7 be cell_display with board, 7
+    let c8 be cell_display with board, 8
+    let V be BLUE + "|" + RESET
+    let top be "    " + BLUE + "+---+---+---+" + RESET
+    let row0 be "    " + V + " " + c0 + " " + V + " " + c1 + " " + V + " " + c2 + " " + V
+    let row1 be "    " + V + " " + c3 + " " + V + " " + c4 + " " + V + " " + c5 + " " + V
+    let row2 be "    " + V + " " + c6 + " " + V + " " + c7 + " " + V + " " + c8 + " " + V
+    say ""
+    say top
+    say row0
+    say top
+    say row1
+    say top
+    say row2
+    say top
+    say ""
+end
+
+define print_banner with _
+    clear_screen with 0
+    say MAGENTA + BOLD + "+======================================+" + RESET
+    say MAGENTA + BOLD + "|        TIC   TAC   TOE   v2.0        |" + RESET
+    say MAGENTA + BOLD + "+======================================+" + RESET
+    say ""
+end
+
+# --- Bot AI ---
+
+# Easy bot: pick a random empty cell.
+# IMPORTANT: "random from A to B" returns a FLOAT in [A, B).
+# We must floor() it to an integer, otherwise set_cell's
+# "j is equal to i" check never matches (int j vs float i),
+# and the bot's move gets silently dropped.
+define bot_move_easy with board
+    let tries be 0
+    while tries is less than 200
+        let r be random from 0 to 9
+        let i be floor of r
+        if i is less than 0
+            let i be 0
+        end
+        if i is greater than 8
+            let i be 8
+        end
+        if cell_empty with board, i
+            return i
+        end
+        let tries be tries + 1
+    end
+    # Fallback: scan for any empty cell
+    let i be 0
+    while i is less than 9
+        if cell_empty with board, i
+            return i
+        end
+        let i be i + 1
+    end
+    return 0
+end
+
+# Hard bot: minimax (perfect play — will draw or win).
+# Generalized: bot_letter is the letter the bot plays.
+#   bot wins    -> +10 - depth   (prefer faster wins)
+#   opponent wins -> -10 + depth   (delay losses)
+#   draw         -> 0
+define minimax with board, depth, is_max_turn, bot_letter
+    let result be check_winner with board
+    if result is equal to bot_letter
+        return 10 - depth
+    end
+    if result is equal to "draw"
+        return 0
+    end
+    if result is not equal to " "
+        # The other player (opponent) won.
+        return -10 + depth
+    end
+
+    if is_max_turn
+        let best be -1000
+        let i be 0
+        while i is less than 9
+            if cell_empty with board, i
+                let nb be set_cell with board, i, bot_letter
+                let score be minimax with nb, depth + 1, false, bot_letter
+                if score is greater than best
+                    let best be score
+                end
+            end
+            let i be i + 1
+        end
+        return best
+    end
+
+    # Minimizing player (the opponent of bot_letter)
+    let opp be other_letter with bot_letter
+    let best be 1000
+    let i be 0
+    while i is less than 9
+        if cell_empty with board, i
+            let nb be set_cell with board, i, opp
+            let score be minimax with nb, depth + 1, true, bot_letter
+            if score is less than best
+                let best be score
+            end
+        end
+        let i be i + 1
+    end
+    return best
+end
+
+# Find the best move for the bot using minimax.
+# bot_letter: the letter the bot is playing this round.
+define bot_move_hard with board, bot_letter
+    let best_score be -1000
+    let best_move be -1
+    let i be 0
+    while i is less than 9
+        if cell_empty with board, i
+            let nb be set_cell with board, i, bot_letter
+            let score be minimax with nb, 0, false, bot_letter
+            if score is greater than best_score
+                let best_score be score
+                let best_move be i
+            end
+        end
+        let i be i + 1
+    end
+    return best_move
+end
+
+# Wrapper: pick the right bot strategy by mode and bot letter.
+define bot_move with mode, board, bot_letter
+    if mode is equal to 1
+        return bot_move_easy with board
+    end
+    # mode 2: hard
+    return bot_move_hard with board, bot_letter
+end
+
+# --- Letter selection ---
+
+# Asks the user to pick X or O. Loops until valid.
+# Returns "X" or "O".
+define choose_letter with prompt_text
+    while true
+        say prompt_text
+        say "    " + CYAN + BOLD + "X" + RESET + " - play first"
+        say "    " + YELLOW + BOLD + "O" + RESET + " - play second"
+        let p be BOLD + "Enter X or O: " + RESET
+        let raw be ask p
+        if raw is equal to "x"
+            return "X"
+        end
+        if raw is equal to "X"
+            return "X"
+        end
+        if raw is equal to "o"
+            return "O"
+        end
+        if raw is equal to "O"
+            return "O"
+        end
+        say RED + "  Please enter X or O." + RESET
+    end
+    return "X"
+end
+
+# --- Human input ---
+
+# Returns a validated cell index 0-8, or -1 to quit
+define get_human_move with board, player, label
+    while true
+        let prompt be BOLD + label + " (" + player + ") to move" + RESET + " - enter cell 1-9 (or q to quit): "
+        let raw be ask prompt
+        if raw is equal to "q"
+            return -1
+        end
+        if raw is equal to "Q"
+            return -1
+        end
+        let n be to_number of raw
+        if n is greater than 0
+            if n is less than 10
+                let idx be floor of (n - 1)
+                if cell_empty with board, idx
+                    return idx
+                end
+                say RED + "  Cell " + raw + " is already taken. Try again." + RESET
+            else
+                say RED + "  Enter a number from 1 to 9." + RESET
+            end
+        else
+            say RED + "  Invalid input. Enter a number 1-9." + RESET
+        end
+    end
+    return -1
+end
+
+# --- Game loop ---
+# mode: 1 = vs bot easy, 2 = vs bot hard, 3 = vs friend
+# Returns true to play again, false to quit
+define play_game with mode, _
+    let board be new_board with 0
+
+    # --- Letter selection at the start of the round ---
+    let human_letter be "X"
+    let bot_letter be "O"
+    let p1_letter be "X"
+    let p2_letter be "O"
+
+    if mode is equal to 3
+        # vs friend: Player 1 picks, Player 2 gets the other
+        let chosen be choose_letter with (BOLD + "Player 1, choose your letter:" + RESET)
+        let p1_letter be chosen
+        let p2_letter be other_letter with chosen
+    else
+        # vs bot: human picks, bot gets the other
+        let chosen be choose_letter with (BOLD + "Choose your letter:" + RESET)
+        let human_letter be chosen
+        let bot_letter be other_letter with chosen
+    end
+
+    # X always goes first.
+    let current be "X"
+
+    # Labels for the prompts
+    let p1_label be "You"
+    let p2_label be "Bot"
+    if mode is equal to 3
+        let p1_label be "Player 1"
+        let p2_label be "Player 2"
+    end
+
+    # Track the last move so we can announce it after the screen clears.
+    let last_move_letter be " "
+    let last_move_cell be 0
+    let last_move_label be ""
+
+    while true
+        print_banner with 0
+        print_board with board
+
+        # Announce the previous move (helps player see what just happened).
+        if last_move_letter is not equal to " "
+            let cell_num be last_move_cell + 1
+            say DIM + "  Last move: " + last_move_label + " placed " + last_move_letter + " at cell " + to_string of cell_num + RESET
+            say ""
+        end
+
+        let winner be check_winner with board
+        if winner is not equal to " "
+            if winner is equal to "draw"
+                say "  " + YELLOW + BOLD + "It's a draw!" + RESET
+            else
+                # Find who won (which label owns this letter)
+                let win_label be "?"
+                if mode is equal to 3
+                    if winner is equal to p1_letter
+                        let win_label be "Player 1"
+                    else
+                        let win_label be "Player 2"
+                    end
+                else
+                    if winner is equal to human_letter
+                        let win_label be "You"
+                    else
+                        let win_label be "Bot"
+                    end
+                end
+                let win_color be CYAN
+                if winner is equal to "O"
+                    let win_color be YELLOW
+                end
+                say "  " + win_color + BOLD + win_label + " (" + winner + ") wins!" + RESET
+            end
+            say ""
+            let p1 be BOLD + "Play again? (y/n): " + RESET
+            let again be ask p1
+            if again is equal to "y"
+                return true
+            end
+            if again is equal to "Y"
+                return true
+            end
+            return false
+        end
+
+        # Whose turn is it?
+        # Determine if this is a bot turn.
+        let is_bot_turn be false
+        let active_label be ""
+
+        if mode is equal to 3
+            # vs friend: no bot, just alternate
+            if current is equal to p1_letter
+                let active_label be p1_label
+            else
+                let active_label be p2_label
+            end
+        else
+            # vs bot
+            if current is equal to bot_letter
+                let is_bot_turn be true
+                let active_label be "Bot"
+            else
+                let active_label be "You"
+            end
+        end
+
+        if is_bot_turn
+            say DIM + "  Bot is thinking..." + RESET
+            let move be bot_move with mode, board, bot_letter
+            let board be set_cell with board, move, bot_letter
+            let last_move_letter be bot_letter
+            let last_move_cell be move
+            let last_move_label be "Bot"
+            # Switch player
+            let current be other_letter with current
+        else
+            let move be get_human_move with board, current, active_label
+            if move is equal to -1
+                say YELLOW + "  Quitting current game." + RESET
+                let p2 be BOLD + "Play again? (y/n): " + RESET
+                let again be ask p2
+                if again is equal to "y"
+                    return true
+                end
+                if again is equal to "Y"
+                    return true
+                end
+                return false
+            end
+            let board be set_cell with board, move, current
+            let last_move_letter be current
+            let last_move_cell be move
+            let last_move_label be active_label
+            # Switch player
+            let current be other_letter with current
+        end
+    end
+    return false
+end
+
+# --- Main menu ---
+
+define main with _
+    while true
+        print_banner with 0
+        say "  " + BOLD + "Choose a mode:" + RESET
+        say ""
+        say "    " + GREEN + "1" + RESET + "  vs Bot  " + DIM + "(Easy - random moves)" + RESET
+        say "    " + RED   + "2" + RESET + "  vs Bot  " + DIM + "(Hard - perfect play, minimax)" + RESET
+        say "    " + CYAN  + "3" + RESET + "  vs Friend " + DIM + "(local 2-player)" + RESET
+        say "    " + DIM   + "q" + RESET + "  Quit"
+        say ""
+        say "  " + DIM + "You will choose X or O at the start of each round." + RESET
+        say "  " + DIM + "Whoever picks X plays first." + RESET
+        say ""
+        let p3 be BOLD + "Selection: " + RESET
+        let choice be ask p3
+        if choice is equal to "q"
+            return
+        end
+        if choice is equal to "Q"
+            return
+        end
+        if choice is equal to "1"
+            let again be play_game with 1, 0
+            if not again
+                return
+            end
+        else if choice is equal to "2"
+            let again be play_game with 2, 0
+            if not again
+                return
+            end
+        else if choice is equal to "3"
+            let again be play_game with 3, 0
+            if not again
+                return
+            end
+        else
+            say RED + "  Invalid selection. Press Enter to continue." + RESET
+            let _ be ask ""
+        end
+    end
+end
+
+main with 0

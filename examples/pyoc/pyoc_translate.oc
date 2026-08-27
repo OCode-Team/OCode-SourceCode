@@ -1,0 +1,85 @@
+# pyoc_translate.oc — OCode→Python translation inside pyoc blocks
+# You can write OCode syntax inside pyoc blocks and it gets translated
+# to Python automatically. Raw Python also works — mix freely!
+
+say "=== OCode translated to Python ==="
+
+pyoc
+say "hello from OCode inside pyoc!" // this comment becomes a Python comment
+end
+
+say ""
+say "=== Variables ==="
+
+pyoc
+let name be "OCode"
+let version be 6
+let active be true
+say name
+say version
+say active
+end
+
+say ""
+say "=== Math with word operators ==="
+
+pyoc
+let a be 10
+let b be 3
+say a plus b
+say a minus b
+say a divided by b
+say a mod b
+end
+
+say ""
+say "=== Comparisons ==="
+
+pyoc
+let x be 42
+say x is greater than 10
+say x is less than 100
+say x is equal to 42
+say x is not equal to 0
+say x is not greater than 100
+say x is not less than 1
+end
+
+say ""
+say "=== Lists ==="
+
+pyoc
+let fruits be ["apple", "banana", "cherry"]
+add "date" to fruits
+say fruits
+remove at 1 from fruits
+say fruits
+end
+
+say ""
+say "=== Mixed OCode and Python ==="
+
+pyoc
+let greeting be "Hello"
+# Python comment — also works!
+say greeting + " from OCode!"
+# Raw Python is passed through unchanged
+for i in range(3):
+    print(f"  Python loop iteration {i}")
+say "Done mixing!"
+end
+
+say ""
+say "=== Python control flow works naturally ==="
+
+pyoc
+# For multi-line Python, use Python's own indentation-based blocks
+for i in range(5):
+    if i % 2 == 1:
+        print(f"  odd: {i}")
+    else:
+        print(f"  even: {i}")
+end
+
+say ""
+say "All OCode syntax was translated to Python automatically!"

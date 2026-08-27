@@ -1,0 +1,117 @@
+# v12_demo.oc — exercise all features
+
+say "=== 1. Dictionaries ==="
+let scores be dict alice is 10, bob is 5, carol is 8
+say scores                              # whole dict
+say scores at "alice"                  # 10
+say scores at "bob"                    # 5
+say length of scores                   # 3
+say keys of scores                     # ["alice","bob","carol"]
+
+say ""
+say "=== 2. Dict mutation (SET_AT) ==="
+scores at "alice" be 15                # overwrite
+scores at "dave" be 20                 # insert new
+say scores at "alice"                  # 15
+say scores at "dave"                   # 20
+say length of scores                   # 4
+
+say ""
+say "=== 3. has / contains on dict ==="
+if has "alice" in scores
+    say "alice is on the board"
+end
+if not has "eve" in scores
+    say "eve is not on the board"
+end
+if contains scores "dave"
+    say "dave is on the board (via contains)"
+end
+
+say ""
+say "=== 4. Dict iteration (two-var form) ==="
+for each name, score in scores
+    say name + ": " + to_string of score
+end
+
+say ""
+say "=== 5. Dict iteration (single-var: keys) ==="
+for each k in scores
+    say k
+end
+
+say ""
+say "=== 6. Dict merge with + ==="
+let a be dict x is 1, y is 2
+let b be dict y is 99, z is 3
+let merged be a + b
+say merged                             # {"x": 1, "y": 99, "z": 3}
+
+say ""
+say "=== 7. range ==="
+say range 1 to 5                       # [1,2,3,4,5]
+say range 0 to 10 step 2              # [0,2,4,6,8,10]
+let sum be 0
+for each i in range 1 to 10
+    let sum be sum + i
+end
+say "sum 1..10 = " + to_string of sum  # 55
+
+say ""
+say "=== 8. CLI args ==="
+say "arg count: " + to_string of (length of args)
+say "arg 0: " + (args at 0)
+if length of args is greater than 1
+    say "arg 1: " + (args at 1)
+end
+
+say ""
+say "=== 9. JSON parse + access ==="
+let json_str be "{\"name\":\"Alice\",\"age\":30,\"skills\":[\"python\",\"ocode\"]}"
+let data be parse_json of json_str
+say data at "name"                     # Alice
+say data at "age"                      # 30
+say (data at "skills") at 0            # python
+
+say ""
+say "=== 10. JSON round-trip ==="
+let obj be dict name is "Bob", active is true, scores is [10, 20, 30]
+let encoded be to_json of obj
+say encoded
+let back be parse_json of encoded
+say back at "name"                     # Bob
+
+say ""
+say "=== 11. Nested JSON ==="
+let nested be parse_json of "{\"a\":{\"b\":{\"c\":42}}}"
+say ((nested at "a") at "b") at "c"    # 42
+
+say ""
+say "=== 12. try / catch ==="
+try
+    let bad be read "/nonexistent/file.txt"
+    say "this should NOT print"
+catch ERR
+    say "caught error: " + ERR
+end
+
+say ""
+say "=== 13. now / today / clock ==="
+say "timestamp: " + to_string of now
+say "today: " + today
+say "clock: " + clock
+
+say ""
+say "=== 14. sleep ==="
+say "sleeping 1 second..."
+sleep 1
+say "done"
+
+say ""
+say "=== 15. List mutation (bonus from SET_AT) ==="
+let nums be [10, 20, 30, 40]
+nums at 1 be 99
+say nums                               # [10, 99, 30, 40]
+
+say ""
+say "=== All features work ==="

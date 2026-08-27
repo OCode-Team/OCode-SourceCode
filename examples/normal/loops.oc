@@ -1,0 +1,30 @@
+# while loop
+let n be 0
+while n is less than 5
+    say n
+    let n be n + 1
+end
+
+# repeat ... times
+repeat 3 times
+    say "spin"
+end
+
+# break and skip
+let i be 0
+while i is less than 10
+    let i be i + 1
+    if i mod 2 is equal to 0
+        skip   # skip even numbers (like continue)
+    end
+    if i is equal to 7
+        break  # stop at 7
+    end
+    say i
+end
+
+# for each ... in list
+let fruits be ["apple", "banana", "cherry"]
+for each fruit in fruits
+    say fruit
+end

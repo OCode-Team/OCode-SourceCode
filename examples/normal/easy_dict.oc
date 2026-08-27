@@ -1,0 +1,40 @@
+# Easy dict syntax demo
+# Run:  ocode examples/normal/easy_dict.oc
+
+# Plain-English dict literal — no quotes, no braces, no colons
+let scores be dict alice is 10, bob is 5, carol is 8
+say "scores: " + to_json of scores
+
+# Read by key
+say "alice's score: " + to_string of (scores at "alice")
+
+# Insert / overwrite with `at ... be ...`
+scores at "alice" be 15
+scores at "dave" be 20
+say "after updates: " + to_json of scores
+
+# Iterate keys + values together
+say "leaderboard:"
+for each name, score in scores
+    say "  " + name + " -> " + to_string of score
+end
+
+# Mix bare and quoted keys
+let profile be dict name is "Alice", "age" is 30, "active" is true
+say "profile: " + to_json of profile
+
+# Nested easy dicts — wrap inner dicts in parens to disambiguate
+let team be dict
+    lead is (dict name is "Carol", level is 9),
+    jr   is (dict name is "Dave",  level is 4)
+say "team: " + to_json of team
+say "lead name: " + to_string of ((team at "lead") at "name")
+
+# Merge with +
+let a be dict x is 1, y is 2
+let b be dict y is 99, z is 3
+say "merged a+b: " + to_json of (a + b)
+
+# Empty dict
+let empty be dict
+say "empty size: " + to_string of (length of empty)

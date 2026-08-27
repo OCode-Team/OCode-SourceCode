@@ -1,0 +1,17 @@
+say "=== Test 2: ws_connect + ws_send + ws_recv (wss://ws.postman-echo.com/raw) ==="
+
+let ws be ws_connect "wss://ws.postman-echo.com/raw"
+say "opened WebSocket handle: " + ws
+
+let n1 be ws_send ws "Hello from OCode!"
+say "sent text frame, " + n1 + " bytes payload"
+
+let reply1 be ws_recv ws
+say "received: " + reply1
+
+let n2 be ws_send ws "Second message over WebSocket"
+let reply2 be ws_recv ws
+say "received: " + reply2
+
+ws_close ws
+say "WebSocket closed"

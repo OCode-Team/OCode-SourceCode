@@ -1,0 +1,2854 @@
+================================================================================
+                         OCODE - COMPLETE COMMAND REFERENCE
+                  Every Command, Example, and Description in the Game
+================================================================================
+
+OCode is an English-like programming language that runs inside the OCDroid
+Android app. It is designed to be readable, friendly, and educational: most
+statements read like natural sentences ("say hello", "for each x in list",
+"if score is greater than 90"). This document lists EVERY command in the
+game -- the language-level statements, the built-in functions, and every
+function exported by every package (library).
+
+HOW TO READ THIS FILE
+---------------------
+  command signature           -- short description
+  Example:                    -- a runnable snippet you can paste into the editor
+
+Sections are organized as follows:
+
+  Part 1 - Language Statements     (let, say, if, while, for, define, ...)
+  Part 2 - Operators & Syntax      (arithmetic, comparison, list/dict literals)
+  Part 3 - Built-in Functions      (no `use` needed; available everywhere)
+           3.1  Core (string, list, math, type)
+           3.2  Char codes (chr, ord)
+           3.3  Dict / JSON / Time
+           3.4  HTTP & Sockets
+           3.5  File I/O
+           3.6  SSL & WebSockets
+           3.7  Bitwise, BigInt, Dates, SQLite, Atomic ops
+           3.8  Math extras
+           3.9  String extras
+           3.10 List extras
+           3.11 Dict extras
+           3.12 Type introspection
+           3.13 Time extras
+           3.14 File I/O extras
+           3.15 Network extras
+           3.16 SQLite extras
+           3.17 System
+           3.18 Random extras
+           3.19 Concurrency
+           3.20 Reflection
+           3.21 Error handling
+           3.22 Encoding & Hashing
+           3.23 v18: extra hashes & persistent variables
+  Part 4 - Packages (need `use <name>` at top of file)
+           4.1   ai          4.26  games         4.51  snake_game
+           4.2   astronomy   4.27  geo           4.52  stats
+           4.3   barcode     4.28  geometry      4.53  string_utils
+           4.4   bitops      4.29  hangman       4.54  strings
+           4.5   bot         4.30  http          4.55  sudoku
+           4.6   calendar    4.31  id            4.56  templating
+           4.7   chess       4.32  ip            4.57  terminal
+           4.8   chemistry   4.33  linus_bot     4.58  time
+           4.9   ciphers     4.34  lists         4.59  trivia_game
+           4.10  color       4.35  logger        4.60  typing
+           4.11  credit_card 4.36  markdown      4.61  unit_convert
+           4.12  cron        4.37  math          4.62  units
+           4.13  crypto      4.38  math_extra    4.63  url
+           4.14  crypto_watcher 4.39 matrix      4.64  uuid
+           4.15  csv         4.40  minesweeper   4.65  validate
+           4.16  date        4.41  morse         4.66  weather
+           4.17  diff        4.42  music         4.67  wordle
+           4.18  discord     4.43  note_taker    4.68  xml
+           4.19  discord_security_bot 4.44 numbers  4.69 zodiac
+           4.20  dicts       4.45  nutrition
+           4.21  encoding    4.46  password
+           4.22  file_manager 4.47 physics
+           4.23  finances    4.48  progress
+           4.24  game_of_life 4.49  regex
+           4.25  geo         4.50  reminder_bot  (also: roman)
+
+LEGEND
+------
+  <name>     placeholder; replace with your own value
+  [...]      optional part
+  a | b      choose one
+  ->         returns / evaluates to
+
+Tip: every example in this file is meant to be runnable inside OCDroid.
+Just paste it into the editor and press Play.
+
+Generated: 2026-08-10 23:18:30
+================================================================================
+
+================================================================================
+PART 1 - LANGUAGE STATEMENTS
+================================================================================
+These are the core building blocks of every OCode program. They are NOT
+functions -- you call them as the first word on a line.
+
+--------------------------------------------------------------------------------
+1.1  VARIABLES & ASSIGNMENT
+--------------------------------------------------------------------------------
+
+let <name> = <expr>                  -- declares (or re-assigns) a variable
+let <name> be <expr>                 -- natural-language variant of the above
+   Example:
+     let x = 5
+     let y be 10
+     let name = "Alice"
+     let nums = [1, 2, 3]
+
+<name> += <expr>                     -- compound assignment: add and store
+<name> -= <expr>                     -- compound assignment: subtract and store
+<name> *= <expr>                     -- compound assignment: multiply and store
+<name> /= <expr>                     -- compound assignment: divide and store
+<name> %= <expr>                     -- compound assignment: modulo and store
+   Example:
+     let i = 0
+     i += 1           # i is now 1
+     i *= 5           # i is now 5
+
+--------------------------------------------------------------------------------
+1.2  OUTPUT
+--------------------------------------------------------------------------------
+
+say <expr>                           -- prints expr followed by a newline
+   Example:
+     say "hello world"
+     say 3 + 4         # prints 7
+     say [1, 2, 3]     # prints [1, 2, 3]
+
+say_inline <expr>                    -- prints expr WITHOUT a trailing newline
+   Example:
+     say_inline "loading... "
+     say "done"        # output: loading... done
+
+--------------------------------------------------------------------------------
+1.3  INPUT
+--------------------------------------------------------------------------------
+
+ask <prompt>                         -- BLOCKING: prompts the user and returns
+                                     -- the typed string. Execution pauses
+                                     -- until the user presses Enter.
+   Example:
+     let name = ask "What is your name? "
+     say "Hello, " + name + "!"
+
+     let raw = ask "Enter a number: "
+     let num = to_number of raw
+     say num * 2
+
+--------------------------------------------------------------------------------
+1.4  CONDITIONALS
+--------------------------------------------------------------------------------
+
+if <cond> ... end                              -- simple if
+if <cond> ... else ... end                     -- if/else
+if <cond> ... else if <cond2> ... else ... end -- if / else-if / else
+if <cond> ... elif <cond2> ... end             -- 'elif' is a synonym for 'else if'
+   Example:
+     let score = 85
+     if score >= 90
+         say "A"
+     else if score >= 80
+         say "B"
+     else if score >= 70
+         say "C"
+     else
+         say "below C"
+     end
+
+     let age = 16
+     if age < 13
+         say "child"
+     elif age < 20
+         say "teen"
+     else
+         say "adult"
+     end
+
+--------------------------------------------------------------------------------
+1.5  LOOPS
+--------------------------------------------------------------------------------
+
+while <cond> ... end                            -- repeat while cond is true
+   Example:
+     let n = 0
+     while n < 5
+         say n
+         let n = n + 1
+     end
+
+for each <item> in <list_or_dict> ... end      -- iterate items of a list,
+                                               -- or keys of a dict
+for each <key>, <value> in <dict> ... end      -- iterate key/value pairs of dict
+   Example:
+     let fruits = ["apple", "banana", "cherry"]
+     for each fruit in fruits
+         say fruit
+     end
+
+     let scores = dict alice is 10, bob is 5
+     for each name, score in scores
+         say name + ": " + to_string of score
+     end
+
+repeat <N> times ... end                       -- repeat a block N times
+   Example:
+     repeat 3 times
+         say "spin"
+     end
+
+break                                           -- exit the enclosing loop
+skip                                            -- skip to next loop iteration
+                                                -- (like 'continue' in other langs)
+   Example:
+     let i = 0
+     while i < 10
+         let i = i + 1
+         if i mod 2 == 0
+             skip          # skip even numbers
+         end
+         if i == 7
+             break         # stop at 7
+         end
+         say i
+     end
+
+--------------------------------------------------------------------------------
+1.6  FUNCTIONS
+--------------------------------------------------------------------------------
+
+define <name> with <p1>, <p2>, ... ... end      -- define a function
+define <name> ... end                          -- function with no parameters
+return <expr>                                  -- return a value from a function
+return                                         -- bare return (returns 0)
+
+Call syntax:  <name> with <arg1>, <arg2>, ...  -- call a function with args
+              <name>                            -- call a function with no args
+
+   Example:
+     define square with n
+         return n * n
+     end
+
+     define factorial with n
+         if n < 2
+             return 1
+         end
+         return n * factorial with n - 1
+     end
+
+     define greet with name
+         say "Hello, " + name + "!"
+     end
+
+     say square with 6       # 36
+     say factorial with 5    # 120
+     greet with "World"      # Hello, World!
+
+--------------------------------------------------------------------------------
+1.7  LIST / DICT MUTATION
+--------------------------------------------------------------------------------
+
+add <value> to <list_var>                      -- append value to list (in place)
+   Example:
+     let nums = [10, 20, 30]
+     add 40 to nums
+     say nums            # [10, 20, 30, 40]
+
+remove at <index> from <list_var>              -- remove list element by index
+   Example:
+     remove at 0 from nums
+     say nums            # [20, 30, 40]
+
+<target> at <key> be <value>                   -- set dict entry or list element
+                                               -- (mutates in place)
+   Example:
+     let scores = dict alice is 10
+     scores at "alice" be 15
+     scores at "dave" be 20
+     say scores at "alice"   # 15
+
+     let arr = [1, 2, 3]
+     arr at 0 be 99
+     say arr                 # [99, 2, 3]
+
+--------------------------------------------------------------------------------
+1.8  ERROR HANDLING
+--------------------------------------------------------------------------------
+
+try ... end                                    -- silently swallow any error
+try ... catch <ERR> ... end                    -- catch the error message
+try ... catch <ERR> ... else ... end           -- run 'else' if no error
+
+error_message                                  -- message of the last caught error
+error_code                                     -- numeric code of the last caught
+                                               -- error (0 if none)
+raise <message> [with <code>]                  -- throw a user-defined error
+
+   Example:
+     try
+         let data = parse_json of "{not valid json"
+         say "should not reach here"
+     catch ERR
+         say "caught: " + ERR
+     end
+
+     define safeDivide with a, b
+         try
+             return a / b
+         catch ERR
+             return 0
+         end
+     end
+
+     say safeDivide with 10, 2     # 5
+     say safeDivide with 10, 0     # 0
+
+     if x < 0
+         raise "x must be non-negative" with 42
+     end
+
+--------------------------------------------------------------------------------
+1.9  PACKAGES (LIBRARIES)
+--------------------------------------------------------------------------------
+
+use <package_name>                             -- load a library written in OCode
+                                               -- (registers its defines)
+
+   Example:
+     use ai
+     use math
+     use weather
+
+     ai_connect with "YOUR_API_KEY", "gpt-4o-mini", "https://api.openai.com/v1", "openai"
+     say ai_ask with "What is OCode in one sentence?"
+
+See Part 4 for the full list of packages.
+
+--------------------------------------------------------------------------------
+1.10  PYTHON BRIDGE (pyoc)
+--------------------------------------------------------------------------------
+
+pyoc                                           -- start a raw Python block
+...                                            -- raw Python lines go here
+end                                            -- end the block
+
+NOTE: pyoc is unsupported on mobile / OCDroid. It will fail with a friendly
+message. Use it only in the desktop version of OCode.
+
+--------------------------------------------------------------------------------
+1.11  COMMENTS
+--------------------------------------------------------------------------------
+
+# ...                                          -- line comment
+// ...                                         -- line comment (alternative)
+/* ... */                                      -- block comment (can span lines)
+
+   Example:
+     # this is a comment
+     let x = 5  // also a comment
+     /* this
+        is a
+        multi-line comment */
+
+--------------------------------------------------------------------------------
+1.12  END-OF-BLOCK KEYWORDS
+--------------------------------------------------------------------------------
+All of the following are accepted as block terminators (synonyms for 'end'):
+
+  end, endif, endelse, endwhile, endfor, endeach,
+  endtry, endcatch, enddefine, endfunc, endfunction, endrepeat
+
+You can also use two-word forms: 'end if', 'end while', 'end for', etc.
+
+================================================================================
+PART 2 - OPERATORS & SPECIAL SYNTAX
+================================================================================
+
+--------------------------------------------------------------------------------
+2.1  ARITHMETIC
+--------------------------------------------------------------------------------
++ - * / %                            -- standard math operators
+                                       (+ also concatenates strings, merges
+                                        lists, and merges dicts)
+plus / minus / mod / remainder       -- English aliases for + - % %
+divided by                           -- English alias for /
+
+   Example:
+     say 3 + 4           # 7
+     say "a" + "b"       # "ab"
+     say [1] + [2]       # [1, 2]
+     say 17 mod 5        # 2
+     say 17 divided by 5 # 3
+
+--------------------------------------------------------------------------------
+2.2  COMPARISON
+--------------------------------------------------------------------------------
+==  !=  <  >  <=  >=                 -- standard comparison operators
+=  is                                -- aliases for ==
+is not                               -- alias for !=
+is less than                         -- alias for <
+is greater than                      -- alias for >
+is less than or equal to             -- alias for <=
+is greater than or equal to          -- alias for >=
+
+   Example:
+     if x is greater than 5
+         say "big"
+     end
+     if x is not equal to 99
+         say "not 99"
+     end
+
+--------------------------------------------------------------------------------
+2.3  LOGICAL
+--------------------------------------------------------------------------------
+and / or / not                       -- short-circuit logical operators
+                                       (word forms; also && || ! in v18)
+
+   Example:
+     if x > 5 and x < 20
+         say "in range"
+     end
+     if not done
+         say "still working"
+     end
+
+--------------------------------------------------------------------------------
+2.4  TERNARY (v18)
+--------------------------------------------------------------------------------
+<cond> ? <if_true> : <if_false>      -- inline conditional expression
+
+   Example:
+     let label = (x >= 0) ? "non-negative" : "negative"
+     say label
+
+--------------------------------------------------------------------------------
+2.5  LITERALS & COLLECTIONS
+--------------------------------------------------------------------------------
+[expr, expr, ...]                    -- list literal (allows trailing comma)
+   Example:
+     let nums = [10, 20, 30]
+     let mixed = [1, "two", true, [2, 3]]
+
+{"k": v, "k2": v2}                   -- JSON-style dict literal
+                                       (bare identifiers also allowed as keys)
+dict <K> is <V>, <K> is <V>, ...     -- natural-language dict literal
+
+   Example:
+     let d1 = {"name": "Alice", "age": 30}
+     let d2 = dict theme is "dark", font is "sans"
+
+<container> at <key>                 -- index access (list[i], string[i],
+                                       dict["k"]); also: '<container> at <i>'
+   Example:
+     say [10, 20, 30] at 1           # 20
+     say "hello" at 0                # 'h'
+     say (dict name is "Bob") at "name"   # Bob
+
+length of <X>                        -- length of string/list/dict (special form)
+   Example:
+     say length of "hello"           # 5
+     say length of [1, 2, 3]         # 3
+
+--------------------------------------------------------------------------------
+2.6  HEX & ESCAPES
+--------------------------------------------------------------------------------
+0x...                                -- hexadecimal integer literal
+   Example:
+     let mask = 0xFF
+     let port = 0x1F90
+
+String escapes: \n \r \t \0 \" \\
+
+--------------------------------------------------------------------------------
+2.7  FUNCTION CALL (POSTFIX 'with')
+--------------------------------------------------------------------------------
+<callable> with <a>, <b>, ...        -- call a function with arguments
+<callable>                           -- call a function with no arguments
+
+   Example:
+     say square with 6
+     say factorial with 5
+     greet with "World"
+
+--------------------------------------------------------------------------------
+2.8  SPECIAL GLOBAL: args
+--------------------------------------------------------------------------------
+args                                 -- magic global list (command-line args).
+                                       In OCDroid it's ["OCDroid"].
+   Example:
+     say length of args       # 1 inside OCDroid
+     say args at 0            # "OCDroid"
+
+================================================================================
+PART 3 - BUILT-IN FUNCTIONS
+================================================================================
+These are available everywhere -- no `use` needed. Built-ins are the standard
+library of the OCode language itself.
+
+--------------------------------------------------------------------------------
+3.1  CORE (string, list, math, type)
+--------------------------------------------------------------------------------
+
+ask <prompt>                        -- BLOCKING input; returns user's typed string
+   Example:
+     let name = ask "Your name? "
+
+length of <X>                       -- length of a string / list / dict
+   Example:
+     say length of "hello"          # 5
+     say length of [1,2,3]          # 3
+     say length of (dict a is 1)    # 1
+
+uppercase of <s>                    -- UPPERCASE a string
+   Example:
+     say uppercase of "hello"       # HELLO
+
+lowercase of <s>                    -- lowercase a string
+   Example:
+     say lowercase of "HELLO"       # hello
+
+trim of <s>                         -- strip leading/trailing whitespace
+   Example:
+     say trim of "  hi  "           # "hi"
+
+split <s> by <sep>                  -- split string into list ("" -> char list)
+   Example:
+     say split "a,b,c" by ","       # ["a", "b", "c"]
+     say split "abc" by ""          # ["a", "b", "c"]
+
+join <list> by <sep>                -- join list into string with separator
+   Example:
+     say join ["a","b","c"] by "-"  # "a-b-c"
+
+contains <container> <item>         -- bool: item in string/list/dict
+contains <item> in <container>      -- alternate form (same result)
+   Example:
+     say contains "hello world" "world"   # true
+     say contains [1,2,3] 2              # true
+     say contains "alice" in (dict alice is 10)   # true
+
+replace <str> from <old> to <new>   -- replace FIRST occurrence of old with new
+   Example:
+     say replace "I like cats" from "cats" to "dogs"
+
+index of <item> in <container>      -- index of item in list/string (-1 if absent)
+   Example:
+     say index of "o" in "hello"    # 4
+
+slice <lst> from <start> to <end>   -- sublist/substring [start, end)
+   Example:
+     say slice "hello world" from 6 to 11   # "world"
+     say slice [1,2,3,4,5] from 1 to 4      # [2,3,4]
+
+sort <list>                         -- sort ascending (numbers numerically;
+                                       else lexicographic)
+   Example:
+     say sort [5, 1, 4, 2, 3]       # [1, 2, 3, 4, 5]
+
+reverse <list_or_str>               -- reversed list, or reversed string
+   Example:
+     say reverse [1, 2, 3]          # [3, 2, 1]
+     say reverse "abc"              # "cba"
+
+abs of <x>                          -- absolute value
+   Example:
+     say abs of -42                 # 42
+
+round of <x>                        -- round to nearest integer
+   Example:
+     say round of 3.7               # 4
+
+floor of <x>                        -- floor (round down)
+   Example:
+     say floor of 3.9               # 3
+
+ceil of <x>                         -- ceiling (round up)
+   Example:
+     say ceil of 3.1                # 4
+
+sqrt of <x>                         -- square root (errors on negative)
+   Example:
+     say sqrt of 16                 # 4
+
+power <base> to <exp>               -- base raised to exp
+   Example:
+     say power 2 to 10              # 1024
+
+min of <a> [and <b>]                -- min of two numbers, or min of a list
+   Example:
+     say min of 5 and 3             # 3
+     say min of [4, 1, 7, 2]        # 1
+
+max of <a> [and <b>]                -- max of two numbers, or max of a list
+   Example:
+     say max of 5 and 3             # 5
+     say max of [4, 1, 7, 2]        # 7
+
+random                              -- random float in [0, 1)
+   Example:
+     say random                     # e.g. 0.7234
+
+random from <lo> to <hi>            -- random float in [lo, hi)
+   Example:
+     let r = random from 1 to 100
+     say r
+
+to_number of <x>                    -- convert string/bool to number
+   Example:
+     say (to_number of "42") + 8    # 50
+
+to_string of <x>                    -- convert any value to its string form
+   Example:
+     say to_string of 100 + " dollars"
+
+to_bool of <x>                      -- convert to bool (truthiness)
+   Example:
+     say to_bool of 0               # false
+     say to_bool of "yes"           # true
+
+is_number of <x>                    -- true if x is a number
+is_string of <x>                    -- true if x is a string
+is_bool of <x>                      -- true if x is a bool
+is_list of <x>                      -- true if x is a list
+   Example:
+     say is_number of 3.14          # true
+     say is_string of "hi"          # true
+     say is_list of [1,2,3]         # true
+     say is_bool of true            # true
+--------------------------------------------------------------------------------
+3.2  CHARACTER CODES (v11)
+--------------------------------------------------------------------------------
+
+chr of <n>                           -- single-char string for codepoint n
+   Example:
+     say chr of 65                   # "A"
+     say chr of 128512               # emoji (handles supplementary planes)
+
+ord of <s>                           -- codepoint of the first character of s
+   Example:
+     say ord of "A"                  # 65
+--------------------------------------------------------------------------------
+3.3  DICT / JSON / TIME (v12)
+--------------------------------------------------------------------------------
+
+keys of <dict>                       -- list of dict keys (insertion order)
+   Example:
+     say keys of (dict a is 1, b is 2)   # ["a", "b"]
+
+has <key> in <dict>                  -- bool: does dict contain the key?
+   Example:
+     if has "alice" in scores
+         say "alice is registered"
+     end
+
+range <from> to <to> [step <n>]     -- list of numbers in [from, to]
+range from <X> to <Y>                -- alternate form
+   Example:
+     say range 1 to 5               # [1, 2, 3, 4, 5]
+     say range 0 to 10 step 2       # [0, 2, 4, 6, 8, 10]
+     say range 5 to 1 step -1       # [5, 4, 3, 2, 1]
+
+now                                  -- current epoch seconds (number)
+   Example:
+     say now                        # e.g. 1723352400
+
+today                                -- current local date as "YYYY-MM-DD"
+   Example:
+     say today                      # e.g. "2026-08-11"
+
+clock                                -- current local time as "HH:MM:SS"
+   Example:
+     say clock                      # e.g. "14:23:01"
+
+sleep <secs>                         -- sleep N seconds (no-op on interrupt)
+   Example:
+     sleep 2
+
+parse_json of <s>                    -- parse JSON string into value
+   Example:
+     let data = parse_json of "{\"name\":\"Alice\",\"age\":30}"
+     say data at "name"             # "Alice"
+
+to_json of <v>                       -- serialize value to JSON string
+   Example:
+     let obj = dict name is "Bob", age is 25
+     say to_json of obj             # {"name":"Bob","age":25}
+
+dict <k> is <v>, <k> is <v>, ...     -- natural-language dict literal
+   Example:
+     let d = dict theme is "dark", font is "sans"
+--------------------------------------------------------------------------------
+3.4  HTTP & SOCKETS (v7-v9)
+--------------------------------------------------------------------------------
+
+http_get <url>                       -- HTTP GET, returns response body string
+   Example:
+     say http_get "https://httpbin.org/json"
+
+http_post <url> with <body>          -- HTTP POST, returns response body string
+   Example:
+     say http_post "https://httpbin.org/post" with "name=OCode"
+
+http_request <url> with <method> [, <body> [, <headers>]]
+                                     -- full HTTP request;
+                                     -- returns [status, body, headers] list
+
+fetch <url>                          -- shorthand GET, returns body string
+fetch <url> with <body>              -- shorthand POST, returns body string
+fetch <url> with <method>, <body> [, <headers>]
+                                     -- full request, returns [status, body, headers]
+   Example:
+     let body = fetch "https://httpbin.org/json"
+     let r = fetch "https://httpbin.org/post" with "POST", "{}", []
+     say r at 0                    # status code
+
+socket <host> <port>                 -- open TCP socket; returns numeric handle
+                                     -- variants: socket H with P, socket H, P, socket H port P
+   Example:
+     let s = socket "example.com" 80
+
+send <handle> <msg>                  -- send data on socket
+                                     -- variants: send H with M, send H, M
+   Example:
+     send s "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n"
+
+readline <handle>                    -- read one line (incl. \n) from socket
+   Example:
+     say readline s                  # e.g. "HTTP/1.0 200 OK\r\n"
+
+receive <handle> [N]                 -- read up to N bytes (or all available)
+   Example:
+     say receive s 100               # read up to 100 bytes
+     say receive s                   # read all available
+
+close <handle>                       -- close a socket handle
+   Example:
+     close s
+--------------------------------------------------------------------------------
+3.5  FILE I/O (v10)
+--------------------------------------------------------------------------------
+
+read <path>                          -- read entire file as UTF-8 string
+   Example:
+     say read "config.oc"
+
+readlines <path>                     -- read file as list of lines (no \r)
+   Example:
+     for each line in readlines "app.log"
+         say line
+     end
+
+write <path> with <content>          -- overwrite file with content (UTF-8)
+   Example:
+     write "config.oc" with "host = localhost\n"
+
+append <path> with <content>         -- append content to file (UTF-8)
+   Example:
+     append "app.log" with "[1] started\n"
+
+ls <path>                            -- list directory entries (sorted)
+   Example:
+     for each name in ls "data"
+         say name
+     end
+
+exists <path>                        -- bool: does path exist?
+   Example:
+     if exists "config.oc"
+         say "config present"
+     end
+
+mkdir <path>                         -- create directory (and parents)
+   Example:
+     mkdir "data"
+
+rm <path>                            -- delete a file
+   Example:
+     rm "old_config.oc"
+--------------------------------------------------------------------------------
+3.6  SSL SOCKETS & WEBSOCKETS (v13)
+--------------------------------------------------------------------------------
+
+ssl_socket <host> <port>             -- open TLS-encrypted TCP socket; returns
+                                       handle (variants: with /, / port)
+   Example:
+     let s = ssl_socket "api.example.com" 443
+
+ws_handshake <handle> with <host> [, <path>]
+                                     -- perform WebSocket HTTP Upgrade
+   Example:
+     ws_handshake s with "api.example.com"
+
+ws_send <handle> with <msg>          -- send masked text frame; returns bytes sent
+   Example:
+     ws_send s with "hello"
+
+ws_recv <handle>                     -- receive one frame payload
+                                     -- (auto-pongs incoming pings)
+   Example:
+     say ws_recv s
+
+ws_ping <handle>                     -- send a ping frame
+   Example:
+     ws_ping s
+
+ws_close <handle>                    -- send close frame and close socket
+   Example:
+     ws_close s
+--------------------------------------------------------------------------------
+3.7  BITWISE / BIGINT / DATES / SQLITE / ATOMIC (v14)
+--------------------------------------------------------------------------------
+
+band <a> with <b>                    -- bitwise AND (variants: band a, b, band a by b)
+bor <a> with <b>                     -- bitwise OR
+bxor <a> with <b>                    -- bitwise XOR
+bnot <a>                             -- bitwise NOT
+bshl <a> by <b>                      -- bitwise shift left
+bshr <a> by <b>                      -- bitwise unsigned shift right
+   Example:
+     say band 0xFF with 0x0F         # 15
+     say bor 0xF0 with 0x0F          # 255
+     say bxor 0xAA with 0x55         # 255
+     say bnot 0                      # -1 (all bits set)
+     say bshl 1 by 8                 # 256
+     say bshr 256 by 2               # 64
+
+bigint of <x>                        -- normalize to BigInteger decimal string
+bigint_add <a> with <b>              -- BigInteger add
+bigint_sub <a> with <b>              -- BigInteger subtract
+bigint_mul <a> with <b>              -- BigInteger multiply
+bigint_cmp <a> with <b>              -- BigInteger compare (-1/0/1)
+bigint_band <a> with <b>             -- BigInteger AND
+bigint_bor <a> with <b>              -- BigInteger OR
+bigint_bxor <a> with <b>             -- BigInteger XOR
+bigint_shl <a> with <n>              -- BigInteger shift left
+bigint_shr <a> with <n>              -- BigInteger shift right
+   Example:
+     let a = bigint of "123456789012345678901234567890"
+     let b = bigint of "987654321098765432109876543210"
+     say bigint_add a with b
+     say bigint_mul a with b
+     say bigint_cmp a with b         # -1
+
+time_iso_after <secs>                -- ISO-8601 UTC timestamp for now + secs
+time_iso_at <epoch>                  -- ISO-8601 UTC timestamp for given epoch
+date_now                             -- current epoch seconds (same as `now`)
+date_parse <str> with <fmt>          -- parse str using SimpleDateFormat (UTC)
+date_format <epoch> with <fmt>       -- format epoch using SimpleDateFormat (UTC)
+date_add <epoch> with <field>, <amount>
+                                     -- add amount to field
+                                     -- (year/month/day/hour/minute/second)
+date_diff <a> with <b>, <field>      -- diff a-b in second/minute/hour/day
+   Example:
+     let now = date_now
+     say date_format now with "yyyy-MM-dd HH:mm:ss"
+     say date_to_iso of now
+     let christmas = date_parse "2026-12-25" with "yyyy-MM-dd"
+     let diff = date_diff now with christmas, "day"
+     say "days until christmas: " + diff
+
+db_open <path>                       -- open or create SQLite DB; returns handle
+db_exec <handle> with <sql>          -- execute non-query SQL (no bindings)
+db_query <handle> with <sql>         -- run query; returns list of dicts
+db_exec_params <handle> with <sql>, <params>
+                                     -- execSQL with bind args
+db_query_params <handle> with <sql>, <params>
+                                     -- rawQuery with bind args
+db_close <handle>                    -- close SQLite database
+   Example:
+     let h = db_open "scores.db"
+     db_exec h with "create table if not exists scores(name text, pts integer)"
+     db_exec_params h with "insert into scores(name, pts) values (?, ?)", ["alice", 100]
+     let rows = db_query h with "select * from scores order by pts desc"
+     for each r in rows
+       say r at "name" + " : " + r at "pts"
+     end
+     db_close h
+
+atomic_write <path> with <content>   -- temp file + fsync + atomic rename
+lock_file <path>                     -- acquire exclusive FileLock; returns handle
+unlock_file <handle>                 -- release a held FileLock
+--------------------------------------------------------------------------------
+3.8  MATH EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+sign of <x>                          -- -1, 0, or 1
+gcd of <a> and <b>                   -- greatest common divisor
+lcm of <a> and <b>                   -- least common multiple
+trunc of <x>                         -- truncate toward zero
+clamp <x> between <lo> and <hi>      -- clamp x to [lo, hi]
+popcount of <x>                      -- number of 1-bits in integer x
+bit_length of <x>                    -- number of bits needed to represent |x|
+   Example:
+     say sign of -5                  # -1
+     say gcd of 24 and 36            # 12
+     say lcm of 4 and 6              # 12
+     say trunc of 3.9                # 3
+     say clamp 15 between 0 and 10   # 10
+     say popcount of 255             # 8
+     say bit_length of 255           # 8
+
+bigint_div <a> by <b>                -- BigInteger integer division
+bigint_mod <a> by <b>                -- BigInteger absolute modulus
+bigint_pow <a> to <n>                -- BigInteger exponentiation
+bigint_to_hex of <a>                 -- BigInteger to hex string
+bigint_from_hex of <s>               -- BigInteger from hex string
+--------------------------------------------------------------------------------
+3.9  STRING EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+starts_with <s> with <prefix>        -- bool: does s start with prefix?
+ends_with <s> with <suffix>          -- bool: does s end with suffix?
+repeat <s> <n> times                 -- repeat string n times
+count <s> with <sub>                 -- count non-overlapping occurrences
+pad_left <s> to <width> [with <ch>]  -- left-pad s to width (default ' ')
+pad_right <s> to <width> [with <ch>] -- right-pad s to width (default ' ')
+format <fmt> with <v1> [, <v2>, ...] -- Java String.format
+capitalize of <s>                    -- capitalize first letter, lower rest
+title_case of <s>                    -- title case (each word capitalized)
+replace_all <s> from <old> with <new>  -- replace ALL occurrences
+code_point_at <s> at <index>         -- Unicode codepoint at index in s
+from_code_point of <n>               -- single-char string for codepoint n
+   Example:
+     say starts_with "hello" with "he"   # true
+     say repeat "ab" 3 times             # "ababab"
+     say pad_left "5" to 3 with "0"      # "005"
+     say capitalize of "hello world"     # "Hello world"
+     say title_case of "hello world"     # "Hello World"
+     say replace_all "a-b-c" from "-" with "/"   # "a/b/c"
+--------------------------------------------------------------------------------
+3.10  LIST EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+pop from <list>                      -- remove and return last element
+shift from <list>                    -- remove and return first element
+unshift <value> to <list>            -- prepend value to list (returns 0)
+insert_at <value> into <list> at <i> -- insert value at index i (returns 0)
+remove_at <index> from <list>        -- remove and return element at index
+extend <list_a> with <list_b>        -- append all of list_b to list_a
+map <list> with <func>               -- apply func to each, return new list
+filter <list> with <func>            -- keep elements where func is truthy
+find <list> with <func>              -- first element where func is truthy
+reduce <list> with <func> from <init> -- left fold: acc = func(acc, x)
+list_contains <value> in <list>      -- bool: is value in list?
+unique of <list>                     -- dedupe list (preserves first occurrence)
+flatten of <list>                    -- flatten one level of nested lists
+chunk <list> into <size>             -- split list into sublists of length size
+zip <list_a> with <list_b>           -- pair-up two lists into [a, b] pairs
+enumerate <list> [from <start>]      -- list of [index, value] pairs
+sum_of [of] <list>                   -- sum of numbers in list
+product_of [of] <list>               -- product of numbers in list
+min_of [of] <list>                   -- minimum number in list
+max_of [of] <list>                   -- maximum number in list
+count_of <value> in <list>           -- count occurrences of value in list
+sort_by <list> with <func>           -- sort list by numeric key from func
+sort_desc <list>                     -- sort list descending (numeric)
+   Example:
+     let nums = [1, 2, 3, 4, 5]
+     say map nums with double        # if `double` is defined, returns [2,4,6,8,10]
+     say filter nums with isEven     # if `isEven` defined
+     say sum_of nums                 # 15
+     say unique of [1, 1, 2, 3, 3]   # [1, 2, 3]
+     say chunk [1,2,3,4,5] into 2    # [[1,2],[3,4],[5]]
+     say zip [1,2] with [3,4]        # [[1,3],[2,4]]
+--------------------------------------------------------------------------------
+3.11  DICT EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+values of <dict>                     -- list of dict values (insertion order)
+items of <dict>                      -- list of [key, value] pairs
+remove_key <key> from <dict>         -- remove key, return old value (or false)
+merge <dict_a> with <dict_b>         -- new dict: a's keys then b's overrides
+copy of <value>                      -- shallow copy of list or dict
+   Example:
+     let d = dict a is 1, b is 2
+     say values of d                 # [1, 2]
+     say items of d                  # [["a",1],["b",2]]
+     say merge (dict a is 1) with (dict a is 99, b is 2)  # {a:99, b:2}
+--------------------------------------------------------------------------------
+3.12  TYPE INTROSPECTION (v15)
+--------------------------------------------------------------------------------
+
+type_of [of] <v>                     -- string: number/string/bool/list/dict
+is_dict [of] <v>                     -- bool
+is_function [of] <v>                 -- bool: v is a string naming a function
+is_empty [of] <v>                    -- bool: empty string/list/dict, 0, false
+is_file [of] <path>                  -- bool: is path a file?
+is_dir [of] <path>                   -- bool: is path a directory?
+to_json_pretty of <v>                -- pretty-printed JSON string
+   Example:
+     say type_of [1, 2, 3]           # "list"
+     say type_of (dict a is 1)       # "dict"
+     say is_empty of []              # true
+     say is_empty of 0               # true
+--------------------------------------------------------------------------------
+3.13  TIME EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+date_parts [of] <epoch>              -- dict: year, month, day, hour, minute,
+                                       second, weekday, yearday
+date_utc_now                         -- current epoch seconds (UTC)
+timezone_offset                      -- local timezone offset in seconds
+timer_start <label>                  -- start a named timer (returns 0)
+timer_stop <label>                   -- stop named timer, return elapsed ms
+date_to_iso [of] <epoch>             -- ISO-8601 UTC string with milliseconds
+date_from_iso [of] <iso_str>         -- parse ISO-8601 string to epoch seconds
+   Example:
+     let parts = date_parts of now
+     say parts at "year"
+     say parts at "weekday"
+     timer_start "loop"
+     # ... do work ...
+     say timer_stop "loop"           # elapsed ms
+--------------------------------------------------------------------------------
+3.14  FILE I/O EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+copy_file <src> to <dst>             -- copy a file
+move_file <src> to <dst>             -- move a file (rename, fallback copy+del)
+stat of <path>                       -- dict: size, mtime, is_dir, is_file,
+                                       readable, writable
+read_binary of <path>                -- read file as list of byte values (0..255)
+write_binary <path> with <bytes>     -- write list of byte values to file
+glob of <pattern>                    -- list of matching paths (* and ?)
+temp_file [with <prefix>]            -- create temp file; returns absolute path
+temp_dir [with <prefix>]             -- create temp dir; returns absolute path
+chmod <path> to <mode>               -- set read/write/exec bits (best-effort)
+cwd                                  -- current working directory string
+chdir to <path>                      -- change working directory
+   Example:
+     say stat of "config.oc"
+     say cwd
+     copy_file "a.txt" to "b.txt"
+     say glob of "*.oc"
+--------------------------------------------------------------------------------
+3.15  NETWORK EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+udp_socket                            -- create UDP socket; returns handle
+server_socket on <port>               -- create TCP ServerSocket; returns handle
+accept <server_handle>                -- block for incoming connection;
+                                        returns client handle
+resolve_host of <hostname>            -- list of resolved IP strings
+set_socket_timeout <handle> to <ms>   -- set SO_TIMEOUT on a socket
+http_download <url> to <path>         -- download URL contents to a file
+http_upload <url> with <file_path> [, <field_name>]
+                                      -- multipart POST upload of a file
+http_set_headers with <dict>          -- set default HTTP headers
+http_set_timeout to <ms>              -- set default HTTP timeout
+   Example:
+     http_download "https://example.com/big.bin" to "big.bin"
+     let s = server_socket on 8080
+     let client = accept s
+--------------------------------------------------------------------------------
+3.16  SQLITE EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+db_begin <handle>                     -- begin transaction
+db_commit <handle>                    -- mark transaction successful (commit on end)
+db_rollback <handle>                  -- end transaction without success (rollback)
+db_last_insert_id of <handle>         -- last INSERT rowid
+db_changes of <handle>                -- rows changed by last statement
+db_prepare <handle> with <sql>        -- compile a SQLiteStatement; return stmt handle
+db_step <stmt> [with <params>]        -- execute statement; returns long or false
+db_finalize <stmt>                    -- close a prepared statement
+   Example:
+     let h = db_open "test.db"
+     db_begin h
+     db_exec h with "insert into t values (1)"
+     db_exec h with "insert into t values (2)"
+     db_commit h
+     say db_changes of h
+--------------------------------------------------------------------------------
+3.17  SYSTEM (v15)
+--------------------------------------------------------------------------------
+
+env [of <name>]                       -- with name: env var value (or false)
+                                      -- without: dict of all env vars
+shell <cmd> [with <input>]            -- run shell command; returns dict
+                                      -- {stdout, stderr, exit}
+exit with <code>                      -- terminate program with exit code
+platform                              -- "linux"/"macos"/"windows"/"android"
+pid                                   -- current process PID
+memory_used                           -- used heap in bytes
+uptime                                -- seconds since runtime started
+hostname                              -- local hostname
+   Example:
+     say platform                     # "android" inside OCDroid
+     say pid
+     say hostname
+     let home = env of "HOME"
+     let r = shell "echo hello from shell"
+     say r at "stdout"
+--------------------------------------------------------------------------------
+3.18  RANDOM EXTRAS (v15)
+--------------------------------------------------------------------------------
+
+random_int from <lo> to <hi>          -- random integer in [lo, hi] (inclusive)
+random_choice [of|from] <list>        -- random element from list
+random_shuffle [of] <list>            -- Fisher-Yates shuffle in place
+random_seed [with] <n>                -- seed the global RNG
+   Example:
+     say random_int from 1 to 6       # like rolling a die
+     say random_choice of ["a", "b", "c"]
+     let deck = [1,2,3,4,5,6,7,8,9,10]
+     random_shuffle of deck
+--------------------------------------------------------------------------------
+3.19  CONCURRENCY (v15)
+--------------------------------------------------------------------------------
+
+thread_start <func> [with <arg>]      -- spawn a thread; returns thread handle
+thread_wait <handle>                  -- join a thread; return its result
+channel_new [with <capacity>]         -- create a channel; returns handle
+channel_send <handle> with <value>    -- blocking send to channel
+channel_recv <handle>                 -- blocking receive from channel
+mutex_new                             -- create a ReentrantLock; returns handle
+mutex_lock <handle>                   -- acquire a mutex
+mutex_unlock <handle>                 -- release a mutex
+   Example:
+     define worker with n
+       sleep 1
+       return n * 2
+     end
+     let t1 = thread_start "worker" with 21
+     say thread_wait t1               # 42
+
+     let ch = channel_new with 16
+     channel_send ch with "hello"
+     say channel_recv ch              # "hello"
+--------------------------------------------------------------------------------
+3.20  REFLECTION (v15)
+--------------------------------------------------------------------------------
+
+eval_ocode [of] <src>                 -- evaluate OCode source in a sub-runtime
+source_line                           -- current source line number
+callable of <v>                       -- bool: v is a string naming a function
+get_var of <name>                     -- look up variable by name (false if undef)
+set_var <name> to <value>             -- set variable by name (returns 0)
+   Example:
+     say eval_ocode of "say 1 + 2"     # 3
+     say source_line                   # current line number
+     say callable of "sort"            # true
+--------------------------------------------------------------------------------
+3.21  ERROR HANDLING (v15)
+--------------------------------------------------------------------------------
+
+raise <message> [with <code>]         -- throw a UserError (optionally with code)
+                                      -- variants: raise with M, raise M with C
+error_message                         -- message of last caught error (or "")
+error_code                            -- numeric code of last caught error (or 0)
+   Example:
+     define sqrt_safe with x
+         if x < 0
+             raise "x must be non-negative" with 42
+         end
+         return sqrt of x
+     end
+
+     try
+         say sqrt_safe with -1
+     catch ERR
+         say "caught: " + ERR
+         say "code: " + error_code
+     end
+--------------------------------------------------------------------------------
+3.22  ENCODING & HASHING (v15)
+--------------------------------------------------------------------------------
+
+encode_base64 of <s>                  -- Base64-encode UTF-8 bytes of s
+decode_base64 of <s>                  -- Base64-decode to UTF-8 string
+hash_sha256 of <s>                    -- hex SHA-256 digest
+hmac_sha256 <key> with <msg>          -- hex HMAC-SHA256
+url_encode of <s>                     -- application/x-www-form-urlencoded
+url_decode of <s>                     -- URL-decode
+   Example:
+     let b64 = encode_base64 of "Hello, World!"
+     say b64                          # "SGVsbG8sIFdvcmxkIQ=="
+     say decode_base64 of b64         # "Hello, World!"
+     say hash_sha256 of "hello"       # 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+     say url_encode of "hello world & foo=bar"
+--------------------------------------------------------------------------------
+3.23  EXTRA HASHES & PERSISTENT VARIABLES (v18)
+--------------------------------------------------------------------------------
+
+hash_md5 of <s>                       -- hex MD5 digest
+hash_sha1 of <s>                      -- hex SHA-1 digest
+hash_sha512 of <s>                    -- hex SHA-512 digest
+save_var <name> with <value>          -- persist value to filesystem; returns true
+load_var <name> [with <fallback>]     -- load persisted value (or fallback if missing)
+saved_vars                            -- list of saved variable names
+clear_saved_var <name>                -- delete persisted file (returns bool)
+   Example:
+     save_var "high_score" with 9000
+     say load_var "high_score"        # 9000
+     say saved_vars                   # ["high_score"]
+     clear_saved_var "high_score"
+
+     say hash_md5 of "hello"          # 5d41402abc4b2a76b9719d911017c592
+     say hash_sha1 of "hello"         # aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+
+================================================================================
+PART 4 - PACKAGES (LIBRARIES)
+================================================================================
+Each package is a small OCode library. To use it, put `use <package>` at the
+top of your file. All defines inside the package become callable.
+
+Example:
+  use ai
+  ai_connect with "YOUR_KEY", "gpt-4o-mini", "https://api.openai.com/v1", "openai"
+  say ai_ask with "What is OCode?"
+
+
+--------------------------------------------------------------------------------
+4.1  PACKAGE: ai  (use ai)
+--------------------------------------------------------------------------------
+OpenAI-compatible chat, embeddings, vision, and function-calling. Works with
+OpenAI, OpenRouter, Groq, Together, local Ollama, and Anthropic.
+
+ai_connect(token, model, api_base, provider)       -- initialize AI client
+   Example: ai_connect with "YOUR_API_KEY", "gpt-4o-mini", "https://api.openai.com/v1", "openai"
+
+ai_disconnect(_)                                   -- clear stored credentials + system prompt
+   Example: ai_disconnect with 0
+
+ai_set_model(model)                                -- switch model; returns new model
+ai_set_base(api_base)                              -- switch API base URL; returns new base
+ai_temperature(t)                                  -- set sampling temperature (0=deterministic, 1=loose)
+ai_max_tokens(n)                                   -- cap response length in tokens
+ai_restrict(system_prompt)                         -- set system prompt constraining assistant behavior
+ai_clear_restrict(_)                               -- remove any previously-set system prompt
+ai_set_system(system_prompt)                       -- alias for ai_restrict
+ai_chat(messages)                                  -- send full message list to chat completions; returns reply text
+ai_ask(prompt)                                     -- simple text question; returns reply text
+ai_ask_with(system_prompt, prompt)                 -- one-shot question with custom system prompt
+ai_code(prompt)                                    -- generate code; auto-sets coder system prompt
+ai_code_oc(prompt)                                 -- generate OCode specifically
+ai_json(prompt)                                    -- ask for JSON object; returns parsed dict/list (strips markdown fences)
+ai_vision(prompt, image_url)                       -- ask a question about a public image URL
+ai_function_call(prompt, tools)                    -- send prompt + tool definitions; returns message dict
+ai_embed(text)                                     -- get embedding vector (text-embedding-3-small)
+ai_models(_)                                       -- list models available at the configured endpoint
+ai_status(_)                                       -- human-readable summary of current AI config
+ai_last_response(_)                                -- text of most recent successful reply
+ai_last_raw(_)                                     -- raw JSON body of most recent API call
+ai_last_usage(_)                                   -- token-usage dict from last call
+ai_converse(convo)                                 -- send list of {role, content} message dicts; returns reply
+ai_summarize(text)                                 -- summarize long text in one sentence
+ai_translate(text, target_language)                -- translate text to target language
+ai_explain(concept, level)                         -- explain concept at chosen expertise level
+   Example:
+     use ai
+     ai_connect with "YOUR_API_KEY", "gpt-4o-mini", "https://api.openai.com/v1", "openai"
+     say ai_status with 0
+     say ai_ask with "What is OCode in one sentence?"
+     say ai_summarize with "Long text..."
+     say ai_translate with "Hello", "French"
+     say ai_explain with "quantum entanglement", "beginner"
+
+--------------------------------------------------------------------------------
+4.2  PACKAGE: astronomy  (use astronomy)
+--------------------------------------------------------------------------------
+Moon phase and sunrise/sunset calculations (NOAA approximation).
+
+moon_phase(year, month, day)                       -- dict {phase, fraction, age_days}
+moon_phase_name(year, month, day)                  -- just the phase name (e.g. "Waxing Crescent")
+sunrise_sunset(lat, lon, year, month, day)         -- dict {sunrise, sunset} as "HH:MM" local solar time
+   Example:
+     use astronomy
+     let mp = moon_phase with 2026, 8, 11
+     say mp at "phase"
+     say mp at "fraction"
+     let ss = sunrise_sunset with 51.5, -0.13, 2026, 8, 11
+     say ss at "sunrise"
+     say ss at "sunset"
+
+--------------------------------------------------------------------------------
+4.3  PACKAGE: barcode  (use barcode)
+--------------------------------------------------------------------------------
+Check-digit computation and validation for retail barcodes and book codes.
+
+ean13_check(s)                                     -- compute EAN-13 check digit from 12-digit string (0-9 or -1)
+ean13_valid(s)                                     -- true if 13-digit string has correct EAN-13 check digit
+upc_check(s)                                       -- compute UPC-A check digit from 11-digit string
+upc_valid(s)                                       -- true if 12-digit UPC-A code is valid
+isbn10_check(s)                                    -- compute ISBN-10 check char from 9-digit string ("0".."9" or "X")
+isbn10_valid(s)                                    -- true if 10-char ISBN-10 is valid
+isbn13_check(s)                                    -- compute ISBN-13 check digit (same algo as EAN-13)
+isbn13_valid(s)                                    -- true if 13-digit ISBN-13 code is valid
+luhn_valid(s)                                      -- Luhn algorithm check on a digit string (credit cards)
+   Example:
+     use barcode
+     say ean13_check with "400638133393"   # 1
+     say ean13_valid with "4006381333931"  # true
+     say luhn_valid with "4111111111111111"  # true (test card)
+
+--------------------------------------------------------------------------------
+4.4  PACKAGE: bitops  (use bitops)
+--------------------------------------------------------------------------------
+Pure-OCode 32-bit unsigned integer bitwise operations.
+
+bit_and(a, b)                                      -- bitwise AND
+bit_or(a, b)                                       -- bitwise OR
+bit_xor(a, b)                                      -- bitwise XOR
+bit_not(a)                                         -- 32-bit NOT
+bit_shl(a, n)                                      -- shift left
+bit_shr(a, n)                                      -- logical shift right (zero-fill)
+bit_set(a, n)                                      -- set bit n; returns new value
+bit_clear(a, n)                                    -- clear bit n
+bit_toggle(a, n)                                   -- toggle bit n
+bit_test(a, n)                                     -- true if bit n is set
+bit_count(a)                                       -- popcount (number of set bits)
+to_binary(a)                                       -- binary string e.g. "10101100"
+from_binary(s)                                     -- parse binary string to int
+to_hex(a)                                          -- lowercase hex string (no "0x" prefix)
+from_hex(s)                                        -- parse hex string to int
+bit_rotate_left(a, n)                              -- 32-bit rotate left
+bit_rotate_right(a, n)                             -- 32-bit rotate right
+   Example:
+     use bitops
+     say bit_and with 0xFF, 0x0F    # 15
+     say bit_or with 0xF0, 0x0F     # 255
+     say bit_count with 255         # 8
+     say to_binary with 42          # "101010"
+     say from_binary with "101010"  # 42
+     say to_hex with 255            # "ff"
+
+--------------------------------------------------------------------------------
+4.5  PACKAGE: bot  (use bot)
+--------------------------------------------------------------------------------
+Helpers for building chat bots (Discord, Telegram, IRC, etc.).
+
+bot_parse_command(text)                            -- parse "/cmd a b c" -> dict {name, args}
+bot_is_command(text, name)                         -- true if text is a "/" command with given name
+bot_format_reply(user, message)                    -- format "@user: message" reply
+bot_cooldown_check(last_time, cooldown_seconds, now_time)  -- true if cooldown has elapsed
+bot_rate_limit(counts, key, max_per_window)        -- increment counter; true if under limit
+bot_rate_limit_reset(counts, key)                  -- reset rate-limit counter for a key
+bot_truncate(text, max_len)                        -- truncate to max_len with "..." ellipsis
+bot_mention(user_id)                               -- "<@user_id>" Discord mention
+bot_channel_mention(channel_id)                    -- "<#channel_id>" Discord channel mention
+bot_help_format(commands)                          -- format list of [name, desc] pairs as help text
+   Example:
+     use bot
+     let cmd = bot_parse_command with "/say hello world"
+     say cmd at "name"             # "say"
+     say cmd at "args"             # ["hello", "world"]
+     say bot_format_reply with "alice", "hi!"   # "@alice: hi!"
+
+--------------------------------------------------------------------------------
+4.6  PACKAGE: calendar  (use calendar)
+--------------------------------------------------------------------------------
+Month-grid calendar rendering with event markers.
+
+month_name(m)                                      -- full English month name for 1..12
+weekday_name(year, month, day)                     -- weekday name (Sunday..Saturday)
+days_in_month(year, month)                         -- number of days in given month
+print_month(year, month, events)                   -- formatted month-grid string; events dict marks days with "*"
+day_of_year(year, month, day)                      -- day-of-year number 1..366
+add_event(events, day, title)                      -- add title to events dict at day; returns events
+   Example:
+     use calendar
+     say month_name with 8                    # "August"
+     say weekday_name with 2026, 8, 11        # "Tuesday"
+     say days_in_month with 2026, 2           # 28
+     let events = []
+     add_event with events, 15, "Meeting"
+     add_event with events, 25, "Holiday"
+     say print_month with 2026, 8, events
+
+--------------------------------------------------------------------------------
+4.7  PACKAGE: chess  (use chess)
+--------------------------------------------------------------------------------
+Minimal chess engine (legal moves, no check/checkmate detection).
+
+new_game()                                         -- starting chess position as 64-element list
+print_board(board)                                 -- ASCII board string with coordinates
+piece_at(board, idx)                               -- piece code at square 0..63
+is_legal_move(board, from_idx, to_idx, white_to_move)  -- true if pseudo-legal move
+apply_move(board, from_idx, to_idx)                -- new board after applying move
+suggest_move(board, white_to_move)                 -- [from, to] greedy move
+   Example:
+     use chess
+     let b = new_game
+     say print_board with b
+     say piece_at with b, 0          # "R" (white rook)
+     say is_legal_move with b, 8, 16, true   # pawn forward (true)
+
+--------------------------------------------------------------------------------
+4.8  PACKAGE: chemistry  (use chemistry)
+--------------------------------------------------------------------------------
+Periodic table lookup and molar-mass calculator.
+
+element(sym)                                       -- dict {symbol, name, number, mass} for an element
+molar_mass(formula)                                -- molar mass (g/mol) of a flat formula like "H2O"
+list_elements()                                    -- list of all element symbols in the table
+   Example:
+     use chemistry
+     say element with "Fe"          # {symbol:Fe, name:Iron, number:26, mass:55.845}
+     say molar_mass with "H2O"      # 18.015
+     say molar_mass with "NaCl"     # 58.44
+
+--------------------------------------------------------------------------------
+4.9  PACKAGE: ciphers  (use ciphers)
+--------------------------------------------------------------------------------
+Classic substitution ciphers.
+
+caesar_encrypt(text, n)                            -- shift each letter by n (preserves case)
+caesar_decrypt(text, n)                            -- reverse of caesar_encrypt (shift by -n)
+rot13(text)                                        -- ROT13 (self-inverse)
+atbash(text)                                       -- Atbash cipher (a<->z)
+vigenere_encrypt(text, key)                        -- Vigenere cipher with keyword
+vigenere_decrypt(text, key)                        -- reverse of vigenere_encrypt
+a1z26_encode(text)                                 -- "abc" -> "1 2 3"
+a1z26_decode(text)                                 -- "1 2 3" -> "abc"
+xor_strings(a, b)                                  -- XOR two equal-length strings byte-by-byte
+reverse_text(text)                                 -- reverse the characters of a string
+   Example:
+     use ciphers
+     say caesar_encrypt with "Hello", 3     # "Khoor"
+     say caesar_decrypt with "Khoor", 3     # "Hello"
+     say rot13 with "Hello, World!"         # "Uryyb, Jbeyq!"
+     say atbash with "abc"                  # "zyx"
+     say vigenere_encrypt with "Attack at dawn", "LEMON"
+     say a1z26_encode with "abc"            # "1 2 3"
+     say a1z26_decode with "1 2 3"          # "abc"
+
+--------------------------------------------------------------------------------
+4.10  PACKAGE: color  (use color)
+--------------------------------------------------------------------------------
+Color conversion and palette generation.
+
+hex_to_rgb(hex)                                    -- "#FF8800" or "FF8800" -> [r, g, b]
+rgb_to_hex(rgb)                                    -- [r, g, b] -> "#RRGGBB"
+rgb_to_hsl(rgb)                                    -- [r, g, b] (0-255) -> [h, s, l] (h:0-360, s/l:0-1)
+hsl_to_rgb(hsl)                                    -- [h, s, l] -> [r, g, b] (0-255)
+random_color()                                     -- random "#RRGGBB" hex color
+lighten(hex, pct)                                  -- lighten a hex color by percentage (0-100)
+darken(hex, pct)                                   -- darken a hex color by percentage
+mix(hex_a, hex_b, ratio)                           -- mix two hex colors (ratio 0=A, 1=B)
+palette(base_hex, n)                               -- generate n-color analogous palette from base hex
+   Example:
+     use color
+     say hex_to_rgb with "#FF8800"     # [255, 136, 0]
+     say rgb_to_hex with [255, 0, 0]   # "#FF0000"
+     say random_color                 # e.g. "#3a7c2d"
+     say lighten with "#336699", 20
+     say mix with "#ff0000", "#0000ff", 0.5    # "#800080"
+
+--------------------------------------------------------------------------------
+4.11  PACKAGE: credit_card  (use credit_card)
+--------------------------------------------------------------------------------
+Credit card number validation, type detection, and formatting.
+
+card_type(s)                                       -- issuer name (Visa/Mastercard/Amex/Discover/...)
+luhn_check(s)                                       -- true if digit string passes Luhn algorithm
+is_valid_card(s)                                   -- true if length + Luhn + known issuer all pass
+format_card(s)                                     -- format card number with spaces
+   Example:
+     use credit_card
+     say card_type with "4111111111111111"    # "Visa"
+     say luhn_check with "4111111111111111"   # true
+     say is_valid_card with "4111111111111111"  # true
+     say format_card with "4111111111111111"  # "4111 1111 1111 1111"
+
+--------------------------------------------------------------------------------
+4.12  PACKAGE: cron  (use cron)
+--------------------------------------------------------------------------------
+Cron expression parser and human-readable describer.
+
+parse(expr)                                        -- dict of 5 cron fields parsed into value lists
+is_valid(expr)                                     -- true if the cron expression is well-formed
+describe(expr)                                     -- human-readable English description
+   Example:
+     use cron
+     say is_valid with "*/5 * * * *"      # true
+     say describe with "0 9 * * 1-5"      # "At minute 0 of hour 9, Monday through Friday"
+     say parse with "*/15 8-17 * * 1-5"
+
+--------------------------------------------------------------------------------
+4.13  PACKAGE: crypto  (use crypto)
+--------------------------------------------------------------------------------
+JWT, HOTP/TOTP, password hashing, hex encoding, XOR obfuscation.
+
+jwt_encode(payload, secret)                        -- create HS256-signed JWT
+jwt_decode(token)                                  -- decode JWT into {header, payload, signature}
+jwt_verify(token, secret)                          -- verify HS256 signature; true if valid
+hotp(secret, counter)                              -- HMAC-SHA256-based HOTP code (6 digits)
+totp(secret, time_step)                            -- current TOTP code (RFC 6238)
+password_hash(password, iterations)                -- "iterations$salt$hash" string
+password_verify(password, stored)                  -- verify password against a password_hash() string
+hex_encode(text)                                   -- encode string to lowercase hex
+hex_decode(hex)                                    -- decode hex string to bytes (as a string)
+random_hex(n_bytes)                                -- random hex string of n_bytes length
+random_token(n_chars)                              -- random alphanumeric token
+crc32(text)                                        -- CRC32 (IEEE 802.3) checksum as an integer
+xor_encrypt(text, key)                             -- XOR text with key, then base64-encode
+xor_decrypt(b64, key)                              -- reverse of xor_encrypt
+   Example:
+     use crypto
+     let tok = jwt_encode with (dict user is "alice"), "secret"
+     say jwt_verify with tok, "secret"      # true
+     say jwt_decode with tok
+     say password_hash with "password123", 10000
+     say hotp with "ABCDEFGH", 12345
+     say hex_encode with "hello"            # "68656c6c6f"
+     say crc32 with "hello"                  # 90706088
+
+--------------------------------------------------------------------------------
+4.14  PACKAGE: crypto_watcher  (use crypto_watcher)
+--------------------------------------------------------------------------------
+Poll cryptocurrency prices from CoinGecko and store in SQLite.
+
+cw_init(h)                                         -- create prices table + index in SQLite handle h
+cw_fetch_price(symbol)                             -- fetch current USD price for a CoinGecko coin id
+cw_record_price(h, symbol)                         -- fetch + insert price snapshot; returns price or false
+cw_price_history(h, symbol, n)                     -- last N price snapshots from DB
+cw_price_change(h, symbol)                         -- 24h % change from oldest to newest
+cw_summary(h)                                      -- formatted summary string of all tracked symbols
+cw_watch(h, symbols, interval, duration)           -- poll loop: fetch each symbol every `interval`s
+   Example:
+     use crypto_watcher
+     let h = db_open "crypto.db"
+     cw_init with h
+     say cw_fetch_price with "bitcoin"
+     cw_record_price with h, "bitcoin"
+     say cw_price_history with h, "bitcoin", 5
+     say cw_summary with h
+
+--------------------------------------------------------------------------------
+4.15  PACKAGE: csv  (use csv)
+--------------------------------------------------------------------------------
+CSV / TSV parsing and writing.
+
+parse_csv(text)                                    -- parse CSV text into list of rows
+parse_tsv(text)                                    -- parse tab-separated text into list of rows
+write_csv(rows)                                    -- convert list of rows into CSV text
+write_tsv(rows)                                    -- convert list of rows into tab-separated text
+csv_head(data, n)                                  -- first n rows (default 5) of parsed CSV data
+csv_column(data, idx)                              -- extract one column (by index)
+csv_find_row(data, idx, value)                     -- first row whose column at idx matches value
+csv_count_rows(data)                               -- number of data rows (excluding header)
+csv_field_needs_quote(field)                       -- true if field contains , " \n \r
+csv_escape_quotes(field)                           -- double-up " in a field for CSV escaping
+   Example:
+     use csv
+     let data = parse_csv with "name,age\nAlice,30\nBob,25"
+     say csv_head with data, 2
+     say csv_column with data, 0
+     say write_csv with [[1,2,3],[4,5,6]]
+
+--------------------------------------------------------------------------------
+4.16  PACKAGE: date  (use date)
+--------------------------------------------------------------------------------
+Date helpers (YYYY-MM-DD format).
+
+date_today(_)                                      -- today's date as "YYYY-MM-DD"
+date_now_iso(_)                                    -- current timestamp as "YYYY-MM-DD HH:MM:SS"
+date_parse(s)                                      -- parse "YYYY-MM-DD" -> [year, month, day]
+date_format(d)                                     -- format [y, m, d] list as "YYYY-MM-DD"
+date_is_leap_year(y)                               -- true if year is a leap year
+date_days_in_month(y, m)                           -- number of days in (year, month)
+date_to_unix(d)                                    -- Unix timestamp (seconds) for [y, m, d] at 00:00 UTC
+date_from_unix(ts)                                 -- [y, m, d] from a Unix timestamp
+date_add_days(d, n)                                -- add n days to [y, m, d]
+date_diff_days(a, b)                               -- signed number of days between two [y, m, d] dates
+date_weekday_num(d)                                -- weekday number 0=Sunday..6=Saturday
+date_weekday(d)                                    -- weekday name (Monday..Sunday)
+   Example:
+     use date
+     say date_today with 0              # e.g. "2026-08-11"
+     say date_now_iso with 0
+     say date_is_leap_year with 2024    # true
+     say date_days_in_month with 2026, 2  # 28
+     say date_add_days with [2026, 1, 1], 30   # [2026, 1, 31]
+     say date_weekday with [2026, 8, 11]   # "Tuesday"
+
+--------------------------------------------------------------------------------
+4.17  PACKAGE: diff  (use diff)
+--------------------------------------------------------------------------------
+Line-level and char-level diffs, unified diffs, and patch application.
+
+diff_lines(a, b)                                   -- line-level diff -> list of {op, line}
+diff_strings(a, b)                                 -- char-level diff -> list of {op, ch}
+diff_unified(a, b, context)                        -- unified-diff string with @@ hunk headers
+patch_apply(original, patch)                       -- apply unified-diff patch; returns patched text
+lcs_length(a, b)                                   -- length of longest common subsequence
+   Example:
+     use diff
+     say diff_lines with "a\nb\nc", "a\nX\nc"
+     say diff_strings with "hello", "hallo"
+     say diff_unified with "line1\nline2\nline3", "line1\nLINE2\nline3", 1
+     say lcs_length with "abcde", "ace"     # 3
+
+--------------------------------------------------------------------------------
+4.18  PACKAGE: discord  (use discord)
+--------------------------------------------------------------------------------
+Full Discord bot SDK: gateway WebSocket, REST API, slash commands, embeds.
+
+discord_on(event, handler)                         -- register a handler for a gateway event
+discord_run(token)                                 -- set bot token, mark running, fetch gateway URL
+discord_stop(_)                                    -- close WebSocket if open
+discord_gateway_connect(_)                         -- open SSL socket, WS handshake, send IDENTIFY
+discord_gateway_recv(_)                            -- read one gateway event (handles heartbeats)
+discord_gateway_send(op, data)                     -- send raw gateway op + data payload
+discord_gateway_close(_)                           -- close gateway WebSocket
+discord_send_message(channelId, content)           -- POST a text message to a channel
+discord_edit_message(channelId, messageId, content) -- PATCH a message's content
+discord_delete_message(channelId, messageId)       -- DELETE a message
+discord_add_reaction(channelId, messageId, emoji)  -- PUT a reaction on a message
+discord_create_embed(title, description, color)    -- build an embed dict
+discord_send_embed(channelId, embed)               -- POST a message containing a single embed
+discord_register_slash_command(appId, name, description)  -- register a global slash command
+discord_respond_interaction(token, text)           -- respond to an interaction (type 4)
+discord_get_me(_)                                  -- GET /users/@me
+discord_get_guilds(_)                              -- GET /users/@me/guilds
+discord_get_channels(guildId)                      -- GET /guilds/{id}/channels
+discord_get_user(userId)                           -- GET /users/{id}
+discord_get_recent_messages(channelId, limit)      -- GET /channels/{id}/messages?limit=N
+discord_set_status(status, activity)               -- build presence-update payload
+discord_typing(channelId)                          -- POST /channels/{id}/typing
+discord_pin_message(channelId, messageId)          -- PUT /channels/{id}/pins/{messageId}
+   Example:
+     use discord
+     discord_on with "MESSAGE_CREATE", "on_msg"
+     discord_run with "YOUR_BOT_TOKEN"
+     # then in your on_msg handler:
+     # discord_send_message with channelId, "hello!"
+
+--------------------------------------------------------------------------------
+4.19  PACKAGE: discord_security_bot  (use discord_security_bot)
+--------------------------------------------------------------------------------
+Moderation toolkit: warnings, mutes, kicks, bans.
+
+mod_init_db(h)                                     -- create warnings / actions / mutes tables
+mod_warn(args)                                     -- args=[h, uid, reason, mod_id]; auto-mute at 3 strikes
+mod_warnings(args)                                 -- args=[h, uid]; list last 10 warnings
+mod_mute(args)                                     -- args=[h, uid, duration_sec]
+mod_unmute(args)                                   -- args=[h, uid]
+mod_is_muted(args)                                 -- args=[h, uid]; true if currently muted
+mod_kick(args)                                     -- args=[h, uid, reason, mod_id]
+mod_ban(args)                                      -- args=[h, uid, reason, mod_id]
+mod_cases(args)                                    -- args=[h]; formatted list of recent 10 actions
+   Example:
+     use discord_security_bot
+     let h = db_open "mod.db"
+     mod_init_db with h
+     mod_warn with [h, "123456", "spamming", "987654"]
+     say mod_warnings with [h, "123456"]
+     say mod_cases with h
+
+--------------------------------------------------------------------------------
+4.20  PACKAGE: dicts  (use dicts)
+--------------------------------------------------------------------------------
+Dict manipulation helpers (most mirror built-ins but with explicit names).
+
+dict_get(d, key, default)                          -- get value for key, or default if missing
+dict_has_key(d, key)                               -- true if dict contains the key
+dict_keys(d)                                       -- list of keys
+dict_values(d)                                     -- list of values
+dict_size(d)                                       -- number of keys
+dict_is_empty(d)                                   -- true if dict has no keys
+dict_merge(a, b)                                   -- new dict with all keys (b's values win)
+dict_to_list(d)                                    -- list of [key, value] pairs
+dict_from_list(pairs)                              -- build dict from list of [k, v] pairs
+dict_copy(d)                                       -- shallow copy
+dict_remove_key(d, key)                            -- new dict without the given key
+   Example:
+     use dicts
+     let d = dict a is 1, b is 2
+     say dict_get with d, "a", 0          # 1
+     say dict_get with d, "z", "default"  # "default"
+     say dict_has_key with d, "a"         # true
+     say dict_size with d                 # 2
+     say dict_to_list with d              # [["a",1],["b",2]]
+
+--------------------------------------------------------------------------------
+4.21  PACKAGE: encoding  (use encoding)
+--------------------------------------------------------------------------------
+Extra encodings: base32, base58, base45, HTML, MIME, soundex, leet, rot13.
+
+base32_encode(s)                                   -- RFC 4648 base32 encode (no padding)
+base32_decode(s)                                   -- base32 decode
+base58_encode(s)                                   -- Bitcoin-style base58 encode (no 0/O/I/l)
+base58_decode(s)                                   -- base58 decode
+base45_encode(s)                                   -- base45 encode (RFC 9285, used in EU COVID certs)
+base45_decode(s)                                   -- base45 decode
+html_escape(s)                                     -- escape & < > " ' to HTML entities
+html_unescape(s)                                   -- reverse of html_escape
+mime_encode(s)                                     -- quoted-printable encode (RFC 2045)
+mime_decode(s)                                     -- reverse of mime_encode
+rot13(s)                                           -- classic letter rotation (self-inverse)
+soundex(s)                                         -- 4-char American soundex code
+leet(s)                                            -- leetspeak conversion (A->4, E->3, etc.)
+   Example:
+     use encoding
+     say base32_encode with "hi"            # "NBUQ===="
+     say base58_encode with "hello"
+     say html_escape with "<a href=\"x\">"     # "&lt;a href=&quot;x&quot;&gt;"
+     say html_unescape with "&lt;b&gt;"      # "<b>"
+     say soundex with "Robert"              # "R163"
+     say leet with "HELLO"                  # "H3LL0"
+     say rot13 with "Hello"                 # "Uryyb"
+
+--------------------------------------------------------------------------------
+4.22  PACKAGE: file_manager  (use file_manager)
+--------------------------------------------------------------------------------
+File system browsing and management.
+
+fm_human_size(bytes)                               -- format bytes as "1.50 KB" / "2.30 MB" / "1.20 GB"
+fm_split_path(path)                                -- dict {dir, name, ext}
+fm_join_path(parts)                                -- join list of parts with "/" (no double slashes)
+fm_file_info(path)                                 -- human-readable file info
+fm_list_dir(path)                                  -- list dir entries with [F]/[D] tag + name + size
+fm_disk_usage(path)                                -- total bytes used by path (recursive)
+fm_search(path, pattern)                           -- find files whose name ends with pattern (recursive)
+fm_copy_dir(src, dst)                              -- recursively copy a directory; returns file count
+fm_clean_temp(prefix)                              -- delete temp files matching prefix
+rmdir_helper(path)                                 -- best-effort remove directory
+   Example:
+     use file_manager
+     say fm_human_size with 1536           # "1.50 KB"
+     say fm_split_path with "/a/b/c.txt"   # {dir:"/a/b", name:"c", ext:".txt"}
+     say fm_join_path with ["a", "b", "c"]
+     say fm_list_dir with "."
+     say fm_disk_usage with "."
+     say fm_search with ".", ".oc"
+
+--------------------------------------------------------------------------------
+4.23  PACKAGE: finances  (use finances)
+--------------------------------------------------------------------------------
+Common financial formulas.
+
+simple_interest(principal, rate, years)            -- interest = principal * rate * years
+compound_interest(principal, rate, years, n)       -- total amount: P*(1+r/n)^(n*t)
+loan_payment(principal, annual_rate, months)       -- monthly payment on amortizing loan
+future_value(monthly_deposit, annual_rate, months) -- future value of regular monthly deposits
+days_to_goal(goal, monthly_deposit, annual_rate)   -- months needed to reach savings goal
+format_money(amount)                               -- format number as "$1234.56"
+percent_of(x, total)                               -- what percent x is of total
+   Example:
+     use finances
+     say simple_interest with 1000, 0.05, 3        # 150
+     say compound_interest with 1000, 0.05, 3, 12  # ~1161.47
+     say loan_payment with 200000, 0.06, 360       # ~1199.10
+     say format_money with 1234.5                  # "$1234.50"
+     say percent_of with 25, 200                   # 12.5
+
+--------------------------------------------------------------------------------
+4.24  PACKAGE: game_of_life  (use game_of_life)
+--------------------------------------------------------------------------------
+Conway's Game of Life simulation.
+
+empty_grid(rows, cols)                             -- rows*cols grid of zeros
+random_grid(rows, cols, density)                   -- grid randomly seeded with alive cells
+print_grid(g)                                      -- grid as a string with # for alive, . for dead
+step(g)                                            -- next generation per Conway's rules
+run(rows, cols, density, generations, delay_secs)  -- run N generations with delay
+glider_grid(rows, cols)                            -- classic glider pattern on an empty grid
+   Example:
+     use game_of_life
+     let g = random_grid with 10, 10, 0.3
+     say print_grid with g
+     let g2 = step with g
+     say print_grid with g2
+
+--------------------------------------------------------------------------------
+4.25  PACKAGE: games  (use games)
+--------------------------------------------------------------------------------
+Tiny terminal games (guess-the-number, RPS, dice, trivia, high/low).
+
+guess_number(upper)                                -- play one round; returns attempts
+rps(pick)                                          -- rock-paper-scissors; "win"/"lose"/"draw"/"invalid"
+roll_dice(n, sides)                                -- roll n dice with s sides; returns list
+coin_flip()                                        -- "heads" or "tails"
+trivia_ask(question, answer)                       -- ask user; true if correct
+high_low()                                         -- play one round; true if won
+   Example:
+     use games
+     say roll_dice with 2, 6           # e.g. [3, 5]
+     say coin_flip                     # "heads"
+     say rps with "rock"               # "win" or "lose" or "draw"
+     say guess_number with 100
+
+--------------------------------------------------------------------------------
+4.26  PACKAGE: geo  (use geo)
+--------------------------------------------------------------------------------
+Geographic distance, bearing, midpoint, and DMS conversion.
+
+geo_distance(lat1, lng1, lat2, lng2)               -- great-circle distance (km) via haversine
+geo_bearing(lat1, lng1, lat2, lng2)                -- initial compass bearing 0-360 degrees
+geo_destination(lat, lng, bearing, distance)       -- destination [lat, lng] from start + bearing + distance (km)
+geo_midpoint(lat1, lng1, lat2, lng2)               -- geographic midpoint as [lat, lng]
+geo_to_dms(lat, lng)                               -- [lat_str, lng_str] in D°M'S"H hemisphere format
+geo_from_dms(s)                                    -- decimal degrees from a DMS string
+   Example:
+     use geo
+     say geo_distance with 51.5, -0.13, 48.85, 2.35   # ~343 km London -> Paris
+     say geo_bearing with 51.5, -0.13, 48.85, 2.35    # ~148 degrees
+     say geo_midpoint with 51.5, -0.13, 48.85, 2.35
+     say geo_to_dms with 51.5, -0.13
+
+--------------------------------------------------------------------------------
+4.27  PACKAGE: geometry  (use geometry)
+--------------------------------------------------------------------------------
+Basic 2D geometry formulas.
+
+distance(x1, y1, x2, y2)                           -- Euclidean distance between two points
+midpoint(x1, y1, x2, y2)                           -- [mx, my] midpoint
+slope(x1, y1, x2, y2)                              -- slope of line through two points
+circle_area(r)                                     -- pi * r^2
+circle_perimeter(r)                                -- 2 * pi * r (circumference)
+square_area(side)                                  -- side^2
+square_perimeter(side)                             -- 4 * side
+rectangle_area(w, h)                               -- w * h
+rectangle_perimeter(w, h)                          -- 2 * (w + h)
+triangle_area(base, h)                             -- 0.5 * base * height
+triangle_perimeter(a, b, c)                        -- sum of three sides
+heron(a, b, c)                                     -- triangle area from 3 sides via Heron's formula
+   Example:
+     use geometry
+     say distance with 0, 0, 3, 4         # 5
+     say midpoint with 0, 0, 10, 10       # [5, 5]
+     say circle_area with 5               # ~78.54
+     say heron with 3, 4, 5               # 6
+
+--------------------------------------------------------------------------------
+4.28  PACKAGE: hangman  (use hangman)
+--------------------------------------------------------------------------------
+Classic hangman word-guessing game.
+
+random_word(category)                              -- random word from "animals"/"fruits"/"countries"
+draw_hangman(wrong)                                -- ASCII art for wrong-count 0..6
+play_hangman(category)                             -- run full hangman game (6 wrong guesses)
+   Example:
+     use hangman
+     say random_word with "animals"
+     say draw_hangman with 3
+     play_hangman with "fruits"
+
+--------------------------------------------------------------------------------
+4.29  PACKAGE: http  (use http)
+--------------------------------------------------------------------------------
+Higher-level HTTP helpers (returns full [status, body, headers] or JSON).
+
+http_get_full(url)                                 -- GET url -> [status, body, headers]
+http_post_full(url, body)                          -- POST url+body -> [status, body, headers]
+http_put_full(url, body)                           -- PUT url+body -> [status, body, headers]
+http_delete_full(url)                              -- DELETE url -> [status, body, headers]
+http_get_json(url)                                 -- GET url -> parsed JSON body
+http_post_json(url, data)                          -- POST url with JSON-serialized data
+http_put_json(url, data)                           -- PUT url with JSON-serialized data
+http_status(url)                                   -- GET url -> just status code
+http_is_success(url)                               -- true if GET returns 2xx
+http_headers(url)                                  -- GET url -> just headers
+http_download_text(url, path)                      -- download URL body to file; returns byte count
+http_build_url(base, params)                       -- build URL with query string from a dict
+   Example:
+     use http
+     say http_status with "https://httpbin.org/get"     # 200
+     say http_is_success with "https://httpbin.org/get"  # true
+     let r = http_get_full with "https://httpbin.org/json"
+     say r at 0                       # 200
+     say r at 1                       # body
+     let j = http_get_json with "https://httpbin.org/json"
+     say j at "slideshow" at "title"
+
+--------------------------------------------------------------------------------
+4.30  PACKAGE: id  (use id)
+--------------------------------------------------------------------------------
+ID generation: UUID v4, base36/62, snowflake-like, sequences.
+
+uuid4(_)                                           -- UUID v4-like string (random hex with dashes)
+random_id(n)                                       -- random alphanumeric ID of length n
+random_hex(n)                                      -- random hex string of length n
+sequence_next(state, name)                         -- next value in a sequence (creates at 1)
+sequence_reset(state, name, value)                 -- reset sequence to value
+encode_base36(num)                                 -- non-negative int -> base-36 string
+decode_base36(s)                                   -- base-36 string -> number
+encode_base62(num)                                 -- non-negative int -> base-62 string
+decode_base62(s)                                   -- base-62 string -> number
+snowflake_like(counter)                            -- ID from timestamp + counter (base62)
+   Example:
+     use id
+     say uuid4 with 0                      # e.g. "550e8400-e29b-41d4-a716-446655440000"
+     say random_id with 12
+     say encode_base36 with 123456         # "21i"
+     say decode_base36 with "21i"          # 123456
+     say encode_base62 with 123456789
+     say snowflake_like with 1
+
+--------------------------------------------------------------------------------
+4.31  PACKAGE: ip  (use ip)
+--------------------------------------------------------------------------------
+IPv4 address parsing, validation, and CIDR helpers.
+
+parse_ipv4(s)                                      -- "a.b.c.d" -> 32-bit int (or -1 on error)
+format_ipv4(n)                                     -- 32-bit int -> dotted-quad string
+is_valid_ipv4(s)                                   -- true if string is a valid IPv4 address
+cidr_to_range(cidr)                                -- dict {network, broadcast, mask, prefix, host_count}
+is_private(s)                                      -- true if IPv4 is in a private RFC 1918 range
+   Example:
+     use ip
+     say parse_ipv4 with "192.168.1.1"    # 3232235777
+     say format_ipv4 with 3232235777       # "192.168.1.1"
+     say is_valid_ipv4 with "192.168.1.1"  # true
+     say is_private with "192.168.1.1"     # true
+     say cidr_to_range with "192.168.1.0/24"
+
+--------------------------------------------------------------------------------
+4.32  PACKAGE: linus_bot  (use linus_bot)
+--------------------------------------------------------------------------------
+Random Linus Torvalds quotes for fun bot replies.
+
+pick_quote(_)                                      -- one random Linus quote from built-in list
+   Example:
+     use linus_bot
+     say pick_quote with 0
+
+--------------------------------------------------------------------------------
+4.33  PACKAGE: lists  (use lists)
+--------------------------------------------------------------------------------
+Comprehensive list manipulation utilities.
+
+list_sum(lst)                                      -- sum of all elements
+list_avg(lst)                                      -- average (0 if empty)
+list_min(lst)                                      -- minimum element (0 if empty)
+list_max(lst)                                      -- maximum element (0 if empty)
+list_range(lst)                                    -- max - min (0 if empty)
+list_product(lst)                                  -- product of all elements
+list_reverse(lst)                                  -- new list with elements reversed
+list_concat(a, b)                                  -- concatenate two lists
+list_has(lst, item)                                -- true if list contains item
+list_index_of(lst, item)                           -- index of first occurrence (or -1)
+list_count(lst, item)                              -- count occurrences of item
+list_unique(lst)                                   -- new list with duplicates removed
+list_flatten(lst)                                  -- flatten one level of nested lists
+list_chunk(lst, size)                              -- split list into chunks of given size
+list_zip(a, b)                                     -- pair elements of two lists
+list_take(lst, n)                                  -- first n elements
+list_drop(lst, n)                                  -- all but first n elements
+list_first(lst)                                    -- first element (0 if empty)
+list_last(lst)                                     -- last element (0 if empty)
+list_is_empty(lst)                                 -- true if list is empty
+list_sort_asc(lst)                                 -- new list sorted ascending
+list_sort_desc(lst)                                -- new list sorted descending
+list_filled(value, n)                              -- new list of n copies of value
+list_deep_flatten(lst)                             -- recursively flatten nested lists
+list_swap(lst, i, j)                               -- swap elements at i and j (in place)
+list_rotate(lst, k)                                -- rotate list by k positions (positive=left)
+list_partition(lst, pivot)                         -- [lower, upper] split at pivot
+list_modes(lst)                                    -- list of most-frequent values
+   Example:
+     use lists
+     say list_sum with [1, 2, 3, 4, 5]      # 15
+     say list_avg with [1, 2, 3, 4, 5]      # 3
+     say list_reverse with [1, 2, 3]        # [3, 2, 1]
+     say list_unique with [1, 1, 2, 3, 3]   # [1, 2, 3]
+     say list_chunk with [1,2,3,4,5], 2     # [[1,2],[3,4],[5]]
+     say list_zip with [1,2], [3,4]         # [[1,3],[2,4]]
+     say list_rotate with [1,2,3,4,5], 2    # [3,4,5,1,2]
+
+--------------------------------------------------------------------------------
+4.34  PACKAGE: logger  (use logger)
+--------------------------------------------------------------------------------
+Structured logging with levels (DEBUG/INFO/WARN/ERROR).
+
+log_new(_)                                         -- new logger state (empty entries, level INFO)
+log_set_level(state, level_name)                   -- set minimum level to log
+log_debug(state, msg)                              -- log a message at DEBUG
+log_info(state, msg)                               -- log a message at INFO
+log_warn(state, msg)                               -- log a message at WARN
+log_error(state, msg)                              -- log a message at ERROR
+log_count(state)                                   -- number of log entries
+log_get(state, idx)                                -- get single log entry by index
+log_filter(state, min_level)                       -- entries at or above given level
+log_dump(state)                                    -- all entries as a single string
+log_clear(state)                                   -- clear all log entries
+log_level_num(name)                                -- level name -> numeric
+log_level_name(n)                                  -- numeric -> level name
+log_append(state, level_name, msg)                 -- internal: append entry if above threshold
+   Example:
+     use logger
+     let log = log_new with 0
+     log_set_level with log, "DEBUG"
+     log_info with log, "app started"
+     log_warn with log, "low memory"
+     log_error with log, "disk full"
+     say log_count with log            # 3
+     say log_dump with log
+
+--------------------------------------------------------------------------------
+4.35  PACKAGE: markdown  (use markdown)
+--------------------------------------------------------------------------------
+Markdown text analysis helpers.
+
+strip_md(s)                                        -- remove markdown syntax; returns plain text
+headings(s)                                        -- list of {level, text} for each heading
+word_count(s)                                      -- count words (ignoring syntax chars)
+link_count(s)                                      -- count markdown links [text](url)
+image_count(s)                                     -- count markdown images ![alt](url)
+code_blocks(s)                                     -- list of code block contents
+   Example:
+     use markdown
+     let md = "# Title\n\nSome **bold** text and [a link](http://x)."
+     say strip_md with md            # "Title Some bold text and a link."
+     say headings with md            # [{level:1, text:"Title"}]
+     say word_count with md
+     say link_count with md          # 1
+
+--------------------------------------------------------------------------------
+4.36  PACKAGE: math  (use math)
+--------------------------------------------------------------------------------
+Extended math: factorials, primes, fibonacci, GCD/LCM, trig helpers.
+
+math_factorial(n)                                  -- n! (0 for negative input)
+math_gcd(a, b)                                     -- greatest common divisor
+math_lcm(a, b)                                     -- least common multiple
+math_is_prime(n)                                   -- true if n is prime
+math_primes_up_to(n)                               -- list of all primes <= n
+math_fibonacci(n)                                  -- nth Fibonacci number (0-indexed)
+math_fibonacci_list(n)                             -- list of first n Fibonacci numbers
+math_power_int(base, exp)                          -- integer power
+math_log2(n)                                       -- floor of base-2 logarithm
+math_log10(n)                                      -- floor of base-10 logarithm
+math_clamp(n, lo, hi)                              -- clamp n to [lo, hi]
+math_wrap(n, lo, hi)                               -- wrap n into [lo, hi) range
+math_deg2rad(deg)                                  -- degrees to radians
+math_rad2deg(rad)                                  -- radians to degrees
+math_sign(n)                                       -- sign of n (-1, 0, or 1)
+math_avg(lst)                                      -- average of list (0 if empty)
+math_sum(lst)                                      -- sum of list
+math_variance(lst)                                 -- population variance (0 if n<2)
+   Example:
+     use math
+     say math_factorial with 10        # 3628800
+     say math_gcd with 24, 36          # 12
+     say math_is_prime with 17         # true
+     say math_primes_up_to with 20     # [2,3,5,7,11,13,17,19]
+     say math_fibonacci with 10        # 55
+     say math_deg2rad with 180         # ~3.14159
+
+--------------------------------------------------------------------------------
+4.37  PACKAGE: math_extra  (use math_extra)
+--------------------------------------------------------------------------------
+Bigint-friendly math (factorials, fibonacci, permutations, combinations).
+
+factorial(n)                                       -- n! as a bigint string
+fibonacci(n)                                       -- nth Fibonacci as bigint string
+is_prime(n)                                        -- true if n is prime
+primes_up_to(n)                                    -- list of all primes <= n
+prime_factors(n)                                   -- list of prime factors (with repeats)
+gcd_list(xs)                                       -- GCD of a list of numbers
+lcm_list(xs)                                       -- LCM of a list of numbers
+permutations(n, r)                                 -- number of permutations nPr
+combinations(n, r)                                 -- number of combinations nCr
+collatz(n)                                         -- length of Collatz sequence starting at n
+   Example:
+     use math_extra
+     say factorial with 50                # bigint string of 50!
+     say fibonacci with 100               # bigint string of F(100)
+     say prime_factors with 360           # [2,2,2,3,3,5]
+     say gcd_list with [12, 18, 24]       # 6
+     say lcm_list with [4, 6, 8]          # 24
+     say permutations with 10, 3          # 720
+     say combinations with 10, 3          # 120
+     say collatz with 27                  # 111
+
+--------------------------------------------------------------------------------
+4.38  PACKAGE: matrix  (use matrix)
+--------------------------------------------------------------------------------
+2D matrix operations.
+
+identity(n)                                        -- n x n identity matrix
+shape(m)                                           -- [rows, cols] of a matrix
+add(a, b)                                          -- element-wise addition
+scalar_multiply(m, k)                              -- multiply every element by scalar k
+multiply(a, b)                                     -- matrix multiplication A * B
+transpose(m)                                       -- transpose (rows become columns)
+trace(m)                                           -- sum of diagonal elements (square only)
+equal(a, b)                                        -- true if same shape and values
+   Example:
+     use matrix
+     let m = [[1, 2], [3, 4]]
+     say shape with m                  # [2, 2]
+     say transpose with m              # [[1,3],[2,4]]
+     say trace with m                  # 5
+     say multiply with m, (identity with 2)   # m unchanged
+
+--------------------------------------------------------------------------------
+4.39  PACKAGE: minesweeper  (use minesweeper)
+--------------------------------------------------------------------------------
+Minesweeper game (board state, reveal, flag, win check).
+
+new_board(width, height, mine_count)               -- board list of cell dicts
+print_board(b, width, height)                      -- visible board as string
+reveal(b, width, height, idx)                      -- flood-fill reveal (ignores flagged)
+toggle_flag(b, idx)                                -- toggle flag on cell at idx
+is_won(b)                                          -- true if every non-mine cell revealed
+play_minesweeper()                                 -- interactive game loop (9x9, 10 mines)
+   Example:
+     use minesweeper
+     let b = new_board with 9, 9, 10
+     say print_board with b, 9, 9
+     let b2 = reveal with b, 9, 9, 40
+     say print_board with b2, 9, 9
+     # or play interactively:
+     # play_minesweeper
+
+--------------------------------------------------------------------------------
+4.40  PACKAGE: morse  (use morse)
+--------------------------------------------------------------------------------
+International Morse Code encoder/decoder.
+
+to_morse(s)                                        -- encode string to Morse (words separated by " / ")
+from_morse(s)                                      -- decode Morse code back into plain text
+is_morse(s)                                        -- true if string contains only . - / and spaces
+morse_beep_pattern(s)                              -- list of {sym, ms} for audible output
+   Example:
+     use morse
+     say to_morse with "SOS"            # "... --- ..."
+     say from_morse with "... --- ..."  # "SOS"
+     say is_morse with "... --- ..."    # true
+
+--------------------------------------------------------------------------------
+4.41  PACKAGE: music  (use music)
+--------------------------------------------------------------------------------
+Music theory: notes, MIDI, frequencies, scales, chords.
+
+note_to_midi(note)                                 -- "C4" or "A#5" -> MIDI note number 0-127
+midi_to_note(midi)                                 -- MIDI note -> "C4" style name with sharps
+frequency(midi)                                    -- frequency in Hz for MIDI note (A4=440)
+interval_semitones(a, b)                           -- absolute semitone distance between two MIDI notes
+major_scale(root)                                  -- list of MIDI notes for a major scale
+minor_scale(root)                                  -- list of MIDI notes for a natural minor scale
+major_triad(root)                                  -- [root, major_third, fifth] MIDI notes
+minor_triad(root)                                  -- [root, minor_third, fifth] MIDI notes
+   Example:
+     use music
+     say note_to_midi with "A4"         # 69
+     say midi_to_note with 69           # "A4"
+     say frequency with 69              # 440.0
+     say major_scale with 60            # [60,62,64,65,67,69,71,72]
+     say major_triad with 60            # [60, 64, 67]
+
+--------------------------------------------------------------------------------
+4.42  PACKAGE: note_taker  (use note_taker)
+--------------------------------------------------------------------------------
+Note-taking app backed by SQLite.
+
+notes_init(h)                                      -- create notes table in SQLite handle h
+notes_add(h, title, body, tags)                    -- add note; returns "Note #N created: <title>"
+notes_list(h)                                      -- formatted list of all notes
+notes_get(h, id)                                   -- full formatted note by id
+notes_search(h, query)                             -- search title + body for query
+notes_by_tag(h, tag)                               -- list notes with a specific tag
+notes_update(h, id, title, body, tags)             -- update existing note
+notes_delete(h, id)                                -- delete note by id
+notes_export_md(h)                                 -- export all notes as Markdown string
+notes_export_to_file(h, path)                      -- export all notes to a Markdown file
+   Example:
+     use note_taker
+     let h = db_open "notes.db"
+     notes_init with h
+     say notes_add with h, "Shopping", "milk, eggs, bread", "home,food"
+     say notes_add with h, "Idea", "build a chat bot", "code,fun"
+     say notes_list with h
+     say notes_search with h, "milk"
+     say notes_by_tag with h, "code"
+
+--------------------------------------------------------------------------------
+4.43  PACKAGE: numbers  (use numbers)
+--------------------------------------------------------------------------------
+Number formatting and utility helpers.
+
+num_abs(n)                                         -- absolute value
+num_floor(n)                                       -- floor
+num_ceil(n)                                        -- ceiling
+num_round(n)                                       -- round to nearest integer
+num_clamp(n, lo, hi)                               -- clamp n to [lo, hi]
+num_between(n, lo, hi)                             -- true if n in [lo, hi] (inclusive)
+num_format(n, decimals)                            -- format to d decimals as string (truncates)
+num_comma(n)                                       -- integer with thousands separators (1,234,567)
+num_bytes(bytes)                                   -- format byte count as "1.50 KB" / "2.30 MB"
+num_percent(fraction, decimals)                    -- format fraction as percentage string
+num_min(a, b)                                      -- minimum of two numbers
+num_max(a, b)                                      -- maximum of two numbers
+num_gcd(a, b)                                      -- GCD of two positive integers
+num_lcm(a, b)                                      -- LCM of two integers
+num_is_even(n)                                     -- true if n is even
+num_is_odd(n)                                      -- true if n is odd
+   Example:
+     use numbers
+     say num_abs with -5                # 5
+     say num_round with 3.7             # 4
+     say num_comma with 1234567         # "1,234,567"
+     say num_bytes with 1536            # "1.50 KB"
+     say num_percent with 0.875, 1      # "87.5%"
+     say num_gcd with 24, 36            # 12
+     say num_is_even with 4             # true
+
+--------------------------------------------------------------------------------
+4.44  PACKAGE: nutrition  (use nutrition)
+--------------------------------------------------------------------------------
+Health & nutrition calculators (BMI, BMR, TDEE, macros, water).
+
+bmi(weight_kg, height_m)                           -- Body Mass Index = weight / height^2
+bmi_category(weight_kg, height_m)                  -- "Underweight"/"Normal"/"Overweight"/"Obese"
+bmr(weight_kg, height_cm, age, sex)                -- Basal Metabolic Rate (Mifflin-St Jeor)
+tdee(bmr_value, activity_level)                    -- Total Daily Energy Expenditure (1-5)
+macros(calories, protein_pct, carb_pct, fat_pct)   -- dict {protein_g, carb_g, fat_g, total_calories}
+water_intake(weight_kg)                            -- recommended daily water intake (liters)
+ideal_weight(height_cm, sex)                       -- Devine formula ideal weight (kg)
+   Example:
+     use nutrition
+     say bmi with 70, 1.75                  # ~22.86
+     say bmi_category with 70, 1.75         # "Normal"
+     say bmr with 70, 175, 30, "male"       # ~1685
+     say tdee with 1685, 2                  # ~2320
+     say macros with 2000, 30, 40, 30
+     say water_intake with 70               # ~2.45 liters
+
+--------------------------------------------------------------------------------
+4.45  PACKAGE: password  (use password)
+--------------------------------------------------------------------------------
+Password strength analysis and generation.
+
+strength(pw)                                       -- score 0-100 (length, case mix, digits, symbols)
+strength_label(pw)                                 -- "Weak"/"Fair"/"Good"/"Strong"
+generate(n)                                        -- random password of length n
+is_common(pw)                                      -- true if password is in built-in common list
+has_lower(pw)                                      -- true if contains lowercase
+has_upper(pw)                                      -- true if contains uppercase
+has_digit(pw)                                      -- true if contains a digit
+has_symbol(pw)                                     -- true if contains a non-alphanumeric char
+   Example:
+     use password
+     say generate with 16                     # e.g. "xK7!pQ2$mN9vL4#z"
+     say strength with "abc"                  # low score
+     say strength with "Abc123!@#XyZ"         # high score
+     say strength_label with "Abc123!@#XyZ"   # "Strong"
+     say is_common with "password"            # true
+     say has_upper with "abc"                 # false
+
+--------------------------------------------------------------------------------
+4.46  PACKAGE: physics  (use physics)
+--------------------------------------------------------------------------------
+Physics formulas: kinematics, forces, energy, electricity, waves.
+
+kinematics_final_velocity(v0, a, t)                 -- v = v0 + a*t
+kinematics_displacement(v0, t, a)                   -- x = v0*t + 0.5*a*t^2
+kinematics_velocity_squared(v0, a, x)               -- v^2 = v0^2 + 2*a*x
+newton_force(m, a)                                 -- F = m*a
+newton_gravity(m1, m2, r)                          -- F = G*m1*m2/r^2
+kinetic_energy(m, v)                               -- KE = 0.5*m*v^2
+potential_energy(m, h, g)                          -- PE = m*g*h (g defaults to 9.81)
+momentum(m, v)                                     -- p = m*v
+impulse(F, t)                                      -- J = F*t
+work(F, d)                                         -- W = F*d
+power_work(W, t)                                   -- P = W/t (0 if t=0)
+ohms_law(v, r, i)                                  -- given 2 of V/R/I (missing as "?"), returns {missing, value}
+series_resistance(r_list)                          -- sum of resistors in series
+parallel_resistance(r_list)                        -- 1 / (1/r1 + 1/r2 + ...) (0 if any r=0)
+coulomb_force(q1, q2, r)                          -- F = k*q1*q2/r^2 (k = 8.99e9)
+wavelength(f, v)                                   -- λ = v / f
+frequency(wavelength, v)                           -- f = v / λ
+snells_law(theta1, n1, n2)                         -- theta2 (degrees) from incidence + refractive indices
+   Example:
+     use physics
+     say newton_force with 10, 9.81         # 98.1
+     say kinetic_energy with 2, 10          # 100
+     say ohms_law with 12, 4, "?"           # {missing:"i", value:3}
+     say series_resistance with [10, 20, 30]   # 60
+     say parallel_resistance with [10, 10]      # 5
+     say snells_law with 30, 1.0, 1.5         # ~19.47
+
+--------------------------------------------------------------------------------
+4.47  PACKAGE: progress  (use progress)
+--------------------------------------------------------------------------------
+Progress bars, spinners, and human-readable formatting.
+
+bar(value, hi, width)                              -- text progress bar "[####-----]"
+percent(current, total)                            -- "NN%" formatted string
+spinner(i)                                         -- i-th frame of spinner animation
+format_time(seconds)                               -- "Xh Ym Zs" formatted duration
+format_bytes(n)                                    -- "1.50 KB" / "3.20 MB"
+clamp(value, lo, hi)                               -- clamp value to [lo, hi]
+   Example:
+     use progress
+     say bar with 7, 10, 20            # "[##############------]"
+     say percent with 7, 10            # "70%"
+     say spinner with 0                # "|"
+     say spinner with 1                # "/"
+     say format_time with 3725         # "1h 2m 5s"
+     say format_bytes with 1536        # "1.50 KB"
+
+--------------------------------------------------------------------------------
+4.48  PACKAGE: regex  (use regex)
+--------------------------------------------------------------------------------
+Pure-OCode regular expression engine (subset of standard regex).
+
+regex_match(pattern, text)                         -- true if entire string matches the pattern
+regex_search(pattern, text)                        -- first match substring (or "")
+regex_find_index(pattern, text)                    -- start index of first match (or -1)
+regex_find_all(pattern, text)                      -- list of all non-overlapping match substrings
+regex_replace(pattern, text, replacement)          -- replace first match
+regex_replace_all(pattern, text, replacement)      -- replace all matches
+regex_split(pattern, text)                         -- split text by pattern
+regex_test(pattern, text)                          -- true if pattern matches anywhere
+regex_count(pattern, text)                         -- count non-overlapping matches
+   Example:
+     use regex
+     say regex_match with "\\d+", "12345"          # true
+     say regex_search with "\\w+@\\w+", "email: a@b.com"   # "a@b"
+     say regex_find_all with "\\d+", "a1b22c333"   # ["1","22","333"]
+     say regex_replace_all with "\\s", "a b c", "_"  # "a_b_c"
+     say regex_split with ",", "a,b,c"               # ["a","b","c"]
+     say regex_count with "o", "foo boo"            # 3
+
+--------------------------------------------------------------------------------
+4.49  PACKAGE: reminder_bot  (use reminder_bot)
+--------------------------------------------------------------------------------
+Persistent reminders backed by SQLite.
+
+rem_init(h)                                        -- create reminders table in SQLite handle h
+rem_add(h, text, when_epoch)                       -- schedule a reminder at epoch
+rem_add_in(h, text, amount, unit)                  -- schedule N <unit>s from now
+rem_list_pending(h)                                -- formatted list of pending reminders
+rem_list_all(h)                                    -- formatted list of all reminders
+rem_due(h)                                         -- list of due reminder rows
+rem_complete(h, id)                                -- mark reminder as done
+rem_cancel(h, id)                                  -- delete a reminder by id
+rem_parse_when(str)                                -- parse "in 5 minutes" -> epoch seconds (or -1)
+rem_loop(h, callback)                              -- poll loop firing callback(text) on due items
+   Example:
+     use reminder_bot
+     let h = db_open "reminders.db"
+     rem_init with h
+     say rem_add_in with h, "Stand up", 5, "minutes"
+     say rem_add_in with h, "Drink water", 1, "hour"
+     say rem_list_pending with h
+     say rem_parse_when with "in 2 days"
+
+--------------------------------------------------------------------------------
+4.50  PACKAGE: roman  (use roman)
+--------------------------------------------------------------------------------
+Roman numeral conversion and arithmetic.
+
+to_roman(n)                                        -- int (1-3999) -> Roman numeral string
+from_roman(s)                                      -- Roman numeral string -> integer
+is_valid_roman(s)                                  -- true if well-formed Roman numeral
+roman_add(a, b)                                    -- add two Roman numerals; returns sum as Roman
+   Example:
+     use roman
+     say to_roman with 2026          # "MMXXVI"
+     say from_roman with "MMXXVI"    # 2026
+     say is_valid_roman with "XLII"  # true
+     say roman_add with "X", "V"     # "XV"
+
+--------------------------------------------------------------------------------
+4.51  PACKAGE: snake_game  (use snake_game)
+--------------------------------------------------------------------------------
+Snake game with high-score persistence.
+
+snake_init_db(h)                                   -- create high_scores table in SQLite handle h
+snake_new_game(width, height)                      -- initial game state dict
+snake_place_food(state)                            -- randomly place food on an empty cell
+snake_step(state, direction)                       -- advance one tick; returns state
+snake_render(state)                                -- ASCII grid string with snake (#), food (*)
+snake_high_scores(h)                               -- top 10 high scores as formatted string
+snake_save_score(h, name, score)                   -- save a score
+snake_play_interactive(h)                          -- interactive game loop (15x10 grid)
+   Example:
+     use snake_game
+     let h = db_open "snake.db"
+     snake_init_db with h
+     let s = snake_new_game with 15, 10
+     say snake_render with s
+     let s2 = snake_step with s, "right"
+     say snake_render with s2
+     # play interactively:
+     # snake_play_interactive with h
+
+--------------------------------------------------------------------------------
+4.52  PACKAGE: stats  (use stats)
+--------------------------------------------------------------------------------
+Statistical functions.
+
+sum_list(xs)                                       -- sum of all numbers
+product_list(xs)                                   -- product of all numbers
+mean(xs)                                           -- arithmetic mean (0 if empty)
+median(xs)                                         -- middle value of sorted list
+mode(xs)                                           -- list of most-frequent value(s)
+variance(xs)                                       -- population variance
+stddev(xs)                                         -- population standard deviation
+range(xs)                                          -- max - min (0 if empty)
+percentile(xs, p)                                  -- value at percentile p (0-100)
+   Example:
+     use stats
+     let data = [2, 4, 4, 4, 5, 5, 7, 9]
+     say mean with data              # 5
+     say median with data            # 4.5
+     say mode with data              # [4]
+     say stddev with data            # ~2.0
+     say percentile with data, 75    # 6.5
+
+--------------------------------------------------------------------------------
+4.53  PACKAGE: string_utils  (use string_utils)
+--------------------------------------------------------------------------------
+Case conversion, slugify, levenshtein, word wrap.
+
+to_camel_case(s)                                   -- "hello world foo" -> "helloWorldFoo"
+to_pascal_case(s)                                  -- "hello world foo" -> "HelloWorldFoo"
+to_snake_case(s)                                   -- "Hello World Foo" -> "hello_world_foo"
+to_kebab_case(s)                                   -- "Hello World Foo" -> "hello-world-foo"
+slugify(s)                                         -- URL-safe: lowercase, spaces->hyphens
+word_wrap(s, width)                                -- wrap text to max line width
+levenshtein(a, b)                                  -- edit distance between two strings
+word_count(s)                                      -- count words
+reverse_words(s)                                   -- reverse word order
+truncate(s, max_len)                               -- truncate with "..." if needed
+   Example:
+     use string_utils
+     say to_camel_case with "hello world foo"   # "helloWorldFoo"
+     say to_pascal_case with "hello world"      # "HelloWorld"
+     say to_snake_case with "Hello World"       # "hello_world"
+     say slugify with "Hello, World!"           # "hello-world"
+     say levenshtein with "kitten", "sitting"   # 3
+     say word_wrap with "aaa bbb ccc ddd", 8
+     say truncate with "Hello, World!", 5       # "He..."
+
+--------------------------------------------------------------------------------
+4.54  PACKAGE: strings  (use strings)
+--------------------------------------------------------------------------------
+Comprehensive string manipulation.
+
+str_length(s)                                      -- length of string
+str_upper(s)                                       -- uppercase
+str_lower(s)                                       -- lowercase
+str_starts_with(s, prefix)                         -- true if starts with prefix
+str_ends_with(s, suffix)                           -- true if ends with suffix
+str_char_at(s, i)                                  -- character at index
+str_index_of(s, sub)                               -- index of first occurrence (or -1)
+str_count(s, sub)                                  -- count non-overlapping occurrences
+str_repeat(s, n)                                   -- repeat s n times
+str_reverse(s)                                     -- reverse the characters
+str_pad_left(s, width, ch)                         -- pad on the left with ch
+str_pad_right(s, width, ch)                        -- pad on the right with ch
+str_center(s, width, ch)                           -- center s in field of width using ch
+str_trim(s)                                        -- trim leading/trailing whitespace
+str_is_empty(s)                                    -- true if empty
+str_is_blank(s)                                    -- true if empty after trimming
+str_swap_case(s)                                   -- swap case of each character
+str_to_camel_case(s)                               -- snake_case -> camelCase
+str_to_pascal_case(s)                              -- snake_case -> PascalCase
+str_to_snake_case(s)                               -- PascalCase -> snake_case
+str_to_kebab_case(s)                               -- PascalCase -> kebab-case
+str_title_case(s)                                  -- capitalize first letter of each word
+str_truncate(s, width)                             -- truncate to width with "..."
+str_capitalize(s)                                  -- uppercase first letter, lowercase rest
+   Example:
+     use strings
+     say str_length with "hello"          # 5
+     say str_repeat with "ab", 3          # "ababab"
+     say str_reverse with "hello"         # "olleh"
+     say str_pad_left with "5", 3, "0"    # "005"
+     say str_center with "hi", 6, "-"     # "--hi--"
+     say str_swap_case with "Hello"       # "hELLO"
+     say str_title_case with "hello world"   # "Hello World"
+
+--------------------------------------------------------------------------------
+4.55  PACKAGE: sudoku  (use sudoku)
+--------------------------------------------------------------------------------
+Sudoku board generation and solver.
+
+empty_board()                                      -- 81-element list of zeros
+print_board(board)                                 -- formatted board string with 3x3 box separators
+is_valid_place(board, idx, d)                      -- true if digit d (1-9) can be placed at idx
+solve(board)                                       -- backtracking solver; mutates board; returns true if solved
+generate()                                         -- new solvable board with ~40 cells removed
+   Example:
+     use sudoku
+     let b = generate
+     say print_board with b
+     if solve with b
+         say print_board with b
+     end
+
+--------------------------------------------------------------------------------
+4.56  PACKAGE: templating  (use templating)
+--------------------------------------------------------------------------------
+{{mustache}}-style template rendering with partials and {{#each}} blocks.
+
+render(template, ctx)                              -- render {{var}} template with context dict
+render_partial(template, ctx, partials)            -- like render, but accepts partials dict
+render_file(path, ctx)                             -- read template from file and render
+template_validate(template)                        -- check {{}} tag balance; returns {ok, error}
+   Example:
+     use templating
+     let tpl = "Hello, {{name}}! You have {{count}} messages."
+     let ctx = dict name is "Alice", count is 5
+     say render with tpl, ctx                # "Hello, Alice! You have 5 messages."
+
+     let each_tpl = "{{#each items}}{{this}}, {{/each}}"
+     say render with each_tpl, (dict items is ["a","b","c"])
+
+--------------------------------------------------------------------------------
+4.57  PACKAGE: terminal  (use terminal)
+--------------------------------------------------------------------------------
+ANSI colors, banners, boxes, tables, horizontal rules.
+
+ansi_red(s)                                        -- wrap text in red ANSI codes
+ansi_green(s)                                      -- wrap text in green
+ansi_yellow(s)                                     -- wrap text in yellow
+ansi_blue(s)                                       -- wrap text in blue
+ansi_cyan(s)                                       -- wrap text in cyan
+ansi_magenta(s)                                    -- wrap text in magenta
+ansi_bold(s)                                       -- wrap text in bold
+ansi_dim(s)                                        -- wrap text in dim/faint
+ansi_reset(_)                                      -- the ANSI reset escape sequence
+box_around(text)                                   -- draw +-+ box around text (multi-line)
+hr(width, ch)                                      -- horizontal rule of given width using ch
+pad_to(text, width)                                -- pad text on the right with spaces to reach width
+table_row(cells, widths)                           -- format list of cells as a single table row
+banner(text)                                       -- big text banner with top/bottom border
+   Example:
+     use terminal
+     say ansi_red with "Error!"
+     say ansi_green with "Success!"
+     say box_around with "Hello"
+     say hr with 40, "="
+     say table_row with [["Name", "Age"], [10, 10]]
+     say banner with "WELCOME"
+
+--------------------------------------------------------------------------------
+4.58  PACKAGE: time  (use time)
+--------------------------------------------------------------------------------
+Human-readable time helpers.
+
+time_now_human(_)                                  -- "YYYY-MM-DD HH:MM:SS"
+time_today_human(_)                                -- "YYYY-MM-DD"
+time_clock_human(_)                                -- "HH:MM:SS"
+time_now_seconds(_)                                -- current Unix epoch seconds
+time_format_duration(seconds)                      -- "1h 1m 1s"
+time_sleep_seconds(s)                              -- sleep s seconds
+time_sleep_ms(ms)                                  -- sleep ms milliseconds
+time_stopwatch_start(_)                            -- return current epoch (start a stopwatch)
+time_stopwatch_elapsed(start)                      -- seconds elapsed since stopwatch start
+time_iso(_)                                        -- ISO-like "YYYY-MM-DDTHH:MM:SS"
+   Example:
+     use time
+     say time_now_human with 0           # e.g. "2026-08-11 14:23:01"
+     say time_today_human with 0         # e.g. "2026-08-11"
+     say time_clock_human with 0         # e.g. "14:23:01"
+     say time_format_duration with 3725  # "1h 2m 5s"
+     let sw = time_stopwatch_start with 0
+     # ... do work ...
+     say time_stopwatch_elapsed with sw
+
+--------------------------------------------------------------------------------
+4.59  PACKAGE: trivia_game  (use trivia_game)
+--------------------------------------------------------------------------------
+Trivia game with question bank and leaderboard.
+
+trivia_load_questions(h)                           -- create questions + scores tables, seed 10 Qs
+trivia_pick_question(h)                            -- random question dict {id, q, options, answer}
+trivia_check_answer(h, qid, user_answer)           -- true if user_answer (0-based index) is correct
+trivia_record_score(h, user, points)               -- upsert user's points + games-played
+trivia_leaderboard(h)                              -- top 10 players formatted string
+trivia_play_round(h, user)                         -- one full question round; "correct"/"wrong"
+   Example:
+     use trivia_game
+     let h = db_open "trivia.db"
+     trivia_load_questions with h
+     say trivia_play_round with h, "alice"
+     say trivia_play_round with h, "bob"
+     say trivia_leaderboard with h
+
+--------------------------------------------------------------------------------
+4.60  PACKAGE: typing  (use typing)
+--------------------------------------------------------------------------------
+Typing speed test (WPM and accuracy).
+
+random_passage()                                   -- random sentence from built-in list
+typing_test()                                      -- run typing test; returns {wpm, accuracy, elapsed}
+compute_wpm(word_count, seconds)                   -- compute WPM
+   Example:
+     use typing
+     say random_passage                # e.g. "The quick brown fox..."
+     let r = typing_test
+     say r at "wpm"                    # e.g. 65
+     say r at "accuracy"               # e.g. 0.92
+     say compute_wpm with 100, 60      # 100
+
+--------------------------------------------------------------------------------
+4.61  PACKAGE: unit_convert  (use unit_convert)
+--------------------------------------------------------------------------------
+Multi-unit conversion (length, weight, volume, speed, time, temperature).
+
+convert_length(value, from_unit, to_unit)          -- m, km, cm, mm, mi, ft, in, yd
+convert_weight(value, from_unit, to_unit)          -- g, kg, mg, t, lb, oz
+convert_volume(value, from_unit, to_unit)          -- l, ml, gal, qt, pt, cup, floz
+convert_speed(value, from_unit, to_unit)           -- mps, kph, mph, knot
+convert_time(value, from_unit, to_unit)            -- s, min, hr, day, week, ms
+celsius_to_fahrenheit(c)                           -- °C -> °F
+fahrenheit_to_celsius(f)                           -- °F -> °C
+celsius_to_kelvin(c)                               -- °C -> K
+kelvin_to_celsius(k)                               -- K -> °C
+   Example:
+     use unit_convert
+     say convert_length with 1, "km", "mi"      # ~0.621
+     say convert_weight with 1, "kg", "lb"      # ~2.205
+     say convert_volume with 1, "gal", "l"      # ~3.785
+     say convert_speed with 100, "kph", "mph"   # ~62.14
+     say celsius_to_fahrenheit with 25          # 77
+
+--------------------------------------------------------------------------------
+4.62  PACKAGE: units  (use units)
+--------------------------------------------------------------------------------
+Simple single-purpose unit conversions.
+
+m_to_ft(m)                                         -- meters to feet
+ft_to_m(ft)                                        -- feet to meters
+km_to_mi(km)                                       -- kilometers to miles
+mi_to_km(mi)                                       -- miles to kilometers
+kg_to_lb(kg)                                       -- kilograms to pounds
+lb_to_kg(lb)                                       -- pounds to kilograms
+c_to_f(c)                                          -- Celsius to Fahrenheit
+f_to_c(f)                                          -- Fahrenheit to Celsius
+l_to_gal(l)                                        -- liters to US gallons
+gal_to_l(gal)                                      -- US gallons to liters
+kph_to_mph(kph)                                    -- km/h to mph
+mph_to_kph(mph)                                    -- mph to km/h
+   Example:
+     use units
+     say m_to_ft with 1            # ~3.281
+     say km_to_mi with 10          # ~6.214
+     say kg_to_lb with 1           # ~2.205
+     say c_to_f with 0             # 32
+     say l_to_gal with 1           # ~0.264
+
+--------------------------------------------------------------------------------
+4.63  PACKAGE: url  (use url)
+--------------------------------------------------------------------------------
+URL parsing and building.
+
+parse_url(s)                                       -- dict {scheme, host, port, path, query, fragment}
+build_url(parts)                                   -- build URL string from a dict of components
+parse_query(q)                                     -- parse query string into dict (url_decoded)
+build_query(d)                                     -- build query string from dict (url_encoded)
+   Example:
+     use url
+     let u = parse_url with "https://example.com:8443/api/v1/users?active=true&limit=10#results"
+     say u at "scheme"     # "https"
+     say u at "host"       # "example.com"
+     say u at "port"       # 8443
+     say u at "path"       # "/api/v1/users"
+     say u at "query"      # "active=true&limit=10"
+     say u at "fragment"   # "results"
+
+     let q = parse_query with "active=true&limit=10"
+     say q at "active"     # "true"
+     say q at "limit"      # "10"
+
+     let parts = {
+       "scheme": "https",
+       "host": "api.example.org",
+       "path": "/v2/search",
+       "query": build_query with {"q": "hello world", "page": "2"}
+     }
+     say build_url with parts   # "https://api.example.org/v2/search?q=hello+world&page=2"
+
+--------------------------------------------------------------------------------
+4.64  PACKAGE: uuid  (use uuid)
+--------------------------------------------------------------------------------
+RFC-4122 UUID generation and validation.
+
+uuid_v4()                                          -- random v4 UUID string
+uuid_v5(namespace_uuid, name)                      -- v5 (SHA-1 namespaced) UUID string
+is_valid_uuid(s)                                   -- true if well-formed UUID
+uuid_version(s)                                    -- version digit (1..5) or 0
+   Example:
+     use uuid
+     let a = uuid_v4
+     say a                               # e.g. "550e8400-e29b-41d4-a716-446655440000"
+     say is_valid_uuid with a            # true
+     say uuid_version with a             # 4
+
+     let ns = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+     let b = uuid_v5 with ns, "example.com"
+     say b                               # deterministic v5
+     say uuid_version with b             # 5
+
+--------------------------------------------------------------------------------
+4.65  PACKAGE: validate  (use validate)
+--------------------------------------------------------------------------------
+Common validators for forms and user input.
+
+is_email(s)                                        -- true if string looks like a valid email
+is_url(s)                                          -- true if starts with http:// or https://
+is_integer(s)                                      -- true if string is a whole number
+is_number(s)                                       -- true if parses as a number (int or float)
+is_positive(n)                                     -- true if n > 0
+in_range(n, lo, hi)                                -- true if n in [lo, hi] inclusive
+has_length(s, lo, hi)                              -- true if string length is in [lo, hi]
+is_nonempty(s)                                     -- true if not empty after trimming
+is_one_of(value, options)                          -- true if value equals any element in options
+validate_required(data, fields)                    -- list of missing required keys
+   Example:
+     use validate
+     say is_email with "alice@example.com"      # true
+     say is_email with "not-an-email"           # false
+     say is_url with "https://example.com"      # true
+     say is_integer with "42"                   # true
+     say is_number with "3.14"                  # true
+     say in_range with 5, 1, 10                 # true
+     say has_length with "hello", 3, 10         # true
+     say is_one_of with "red", ["red","green","blue"]  # true
+     say validate_required with (dict a is 1), ["a", "b"]  # ["b"]
+
+--------------------------------------------------------------------------------
+4.66  PACKAGE: weather  (use weather)
+--------------------------------------------------------------------------------
+Weather data via Open-Meteo (no API key required).
+
+weather_lookup(lat, lng)                           -- dict of current weather (temp, wind, code, humidity)
+weather_forecast(lat, lng)                         -- list of 7-day daily forecast dicts
+weather_by_city(city)                              -- current weather by city name
+weather_describe(code)                             -- human-readable description of WMO code
+weather_temp_c(w)                                  -- extract temperature in °C
+weather_temp_f(w)                                  -- extract temperature in °F
+   Example:
+     use weather
+     let w = weather_by_city with "London"
+     say w at "city"
+     say w at "country"
+     say weather_temp_c with w            # e.g. 18.5
+     say weather_temp_f with w            # e.g. 65.3
+     say weather_describe with (w at "code")   # e.g. "Partly cloudy"
+
+     let forecast = weather_forecast with 51.5, -0.13
+     for each day in forecast
+         say day at "date" + ": " + (day at "temp_max") + "°C"
+     end
+
+--------------------------------------------------------------------------------
+4.67  PACKAGE: wordle  (use wordle)
+--------------------------------------------------------------------------------
+Wordle word-guessing game.
+
+score_guess(secret, guess)                         -- 5-char feedback: G=green, Y=yellow, _=gray
+is_valid_word(guess)                               -- true if 5-letter alphabetic word
+play_wordle(secret)                                -- run full Wordle game (6 tries)
+random_word()                                      -- random 5-letter word from built-in list
+   Example:
+     use wordle
+     let secret = random_word
+     say score_guess with secret, "crane"   # e.g. "_Y_G_"
+     say is_valid_word with "hello"         # true
+     # play interactively:
+     # play_wordle with random_word
+
+--------------------------------------------------------------------------------
+4.68  PACKAGE: xml  (use xml)
+--------------------------------------------------------------------------------
+XML parser and navigator.
+
+xml_parse(xml_str)                                 -- parse XML into root element dict
+xml_get(elem, path)                                -- navigate by "a/b/c" path; returns descendant
+xml_attr(elem, name)                               -- attribute value (or "")
+xml_text(elem)                                     -- direct text content
+xml_children(elem)                                 -- list of child element dicts
+xml_find(elem, tag_name)                           -- first descendant element with that tag
+xml_find_all(elem, tag_name)                       -- list of all descendant elements
+xml_to_string(elem)                                -- serialize element dict back to XML
+   Example:
+     use xml
+     let xml = "<book><title>1984</title><author>Orwell</author></book>"
+     let root = xml_parse with xml
+     say xml_text with (xml_find with root, "title")    # "1984"
+     say xml_text with (xml_find with root, "author")   # "Orwell"
+     for each child in xml_children with root
+         say xml_to_string with child
+     end
+
+--------------------------------------------------------------------------------
+4.69  PACKAGE: zodiac  (use zodiac)
+--------------------------------------------------------------------------------
+Zodiac sign lookup, compatibility, Chinese zodiac, birthstones.
+
+western_sign(month, day)                           -- Western zodiac sign name
+western_element(sign)                              -- "Fire"/"Earth"/"Air"/"Water"
+chinese_zodiac(year)                               -- Chinese zodiac animal
+chinese_element(year)                              -- "Wood"/"Fire"/"Earth"/"Metal"/"Water"
+birthstone(month)                                  -- traditional birthstone for birth month
+zodiac_compatibility(sign_a, sign_b)               -- "High"/"Medium"/"Low"
+   Example:
+     use zodiac
+     say western_sign with 8, 11          # "Leo"
+     say western_element with "Leo"       # "Fire"
+     say chinese_zodiac with 2026         # "Horse"
+     say chinese_element with 2026        # "Fire"
+     say birthstone with 8                # "Peridot"
+     say zodiac_compatibility with "Leo", "Aries"   # "High"
+
+================================================================================
+                              END OF REFERENCE
+================================================================================
+Quick reference card:
+
+  STATEMENTS    let, say, say_inline, ask, if/else/elif/end, while/end,
+                for each in/end, repeat times/end, define with/end, return,
+                add to, remove at from, target at key be, +=, break, skip,
+                try/catch/end, use, pyoc, raise
+
+  LITERALS      [a, b, c]      list literal
+                {"k": v}       JSON dict literal
+                dict k is v, k is v   natural dict literal
+                0x...          hex number
+
+  KEY BUILTINS  say, ask, length of, sort, reverse, slice, contains,
+                split by, join by, parse_json, to_json, keys of, has in,
+                range to, now, today, sleep, abs, sqrt, round, random,
+                to_number, to_string, type_of, eval_ocode,
+                read, write, ls, mkdir, exists, fetch, http_get, http_post,
+                socket, send, receive, close, ssl_socket, ws_*,
+                band/bor/bxor/bnot/bshl/bshr, bigint_*, db_*,
+                thread_start, thread_wait, channel_*, mutex_*,
+                hash_sha256, encode_base64, url_encode, save_var, load_var
+
+  PACKAGES (~70 in total; see Part 4)
+    ai, astronomy, barcode, bitops, bot, calendar, chess, chemistry,
+    ciphers, color, credit_card, cron, crypto, crypto_watcher, csv, date,
+    diff, discord, discord_security_bot, dicts, encoding, file_manager,
+    finances, game_of_life, games, geo, geometry, hangman, http, id, ip,
+    linus_bot, lists, logger, markdown, math, math_extra, matrix,
+    minesweeper, morse, music, note_taker, numbers, nutrition, password,
+    physics, progress, regex, reminder_bot, roman, snake_game, stats,
+    string_utils, strings, sudoku, templating, terminal, time, trivia_game,
+    typing, unit_convert, units, url, uuid, validate, weather, wordle,
+    xml, zodiac
+
+Tips for writing OCode:
+  - Most statements read like English sentences. When in doubt, try the
+    natural-language form first ("for each x in list", "say hello", "if
+    x is greater than 5").
+  - Use `use <package>` at the top of your file to import a library.
+  - Inside try/catch, the error message is captured into your ERR variable.
+  - The `args` global is ["OCDroid"] when run inside the app.
+  - `length of X` works on strings, lists, and dicts.
+  - `+` is overloaded: numbers add, strings concatenate, lists/dicts merge.
+  - `at` is the universal index/key accessor: `nums at 0`, `dict at "k"`.
+  - All block-ending variants are interchangeable: `end`, `endif`, `endwhile`,
+    `endfor`, `endeach`, `endtry`, `enddefine`, `endfunc`, `endfunction`,
+    `endrepeat`, `endelse`, `endcatch`. You can also use two-word forms
+    like `end if`, `end while`.
+
+Happy OCoding!
+================================================================================

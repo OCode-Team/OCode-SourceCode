@@ -1,0 +1,66 @@
+# Raw TCP sockets — v9 (super-easy syntax)
+#
+# Five builtins:
+#   socket HOST PORT                   → handle (number)
+#   send HANDLE MSG                    → bytes sent (number)
+#   receive HANDLE                     → string (all available, 2s quiet timeout)
+#   receive HANDLE N                   → string (up to N bytes)
+#   readline HANDLE                    → string (one line, includes \n)
+#   close HANDLE                       → 0 on success
+#
+# Handles are 1-based numbers. Any sockets still open when the program
+# ends are closed automatically.
+
+# --- 1. Raw HTTP GET via TCP (port 80) -----------------------------------
+say "1. Raw TCP GET to example.com:"
+let s be socket "example.com" 80
+send s "GET / HTTP/1.0\r\nHost: example.com\r\nConnection: close\r\n\r\n"
+let page be receive s
+say slice page from 0 to 120
+close s
+say ""
+
+
+# --- 2. Read line by line -----------------------------------------------
+say "2. Read first line via readline:"
+let s2 be socket "example.com" 80
+send s2 "GET / HTTP/1.0\r\nHost: example.com\r\nConnection: close\r\n\r\n"
+let status be readline s2
+say "  status line: " + status
+close s2
+say ""
+
+
+# --- 3. Bounded receive (just N bytes) -----------------------------------
+say "3. receive with byte limit:"
+let s3 be socket "example.com" 80
+send s3 "GET / HTTP/1.0\r\nHost: example.com\r\nConnection: close\r\n\r\n"
+let chunk be receive s3 80
+say "  first 80 bytes: " + chunk
+close s3
+say ""
+
+
+# --- 4. Multiple sequential connections ----------------------------------
+say "4. Two hosts in a row:"
+let a be socket "example.com" 80
+send a "GET / HTTP/1.0\r\nHost: example.com\r\nConnection: close\r\n\r\n"
+let la be readline a
+say "  example.com status: " + la
+close a
+
+let b be socket "httpbin.org" 80
+send b "GET / HTTP/1.0\r\nHost: httpbin.org\r\nConnection: close\r\n\r\n"
+let lb be readline b
+say "  httpbin.org status: " + lb
+close b
+say ""
+
+
+# --- 5. Don't close — program exit cleans up -----------------------------
+say "5. Open socket without closing (auto-cleanup on exit):"
+let s5 be socket "example.com" 80
+send s5 "HEAD / HTTP/1.0\r\nHost: example.com\r\n\r\n"
+let h be readline s5
+say "  status: " + h
+# Intentionally no `close s5` — interpreter closes it on exit

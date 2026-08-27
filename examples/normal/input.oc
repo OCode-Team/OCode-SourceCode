@@ -1,0 +1,6 @@
+let name be ask "What is your name? "
+say "Hello, " + name + "!"
+
+let raw be ask "Enter a number: "
+let num be to_number of raw
+say num * 2

@@ -1,0 +1,71 @@
+# colors.oc — v11 demo: ANSI colors, cursor control, and Unicode via chr/ord.
+#
+# OCode's string literals can't hold raw non-printable bytes (the lexer
+# strips them), so the only way to get an ESC byte into a string is
+# `chr of 27`. Once you have ESC, you can build any ANSI sequence.
+
+# --- The escape byte ---
+let ESC be chr of 27
+
+# --- Styles / colors (SGR codes) ---
+let RESET   be ESC + "[0m"
+let BOLD    be ESC + "[1m"
+let DIM     be ESC + "[2m"
+let ITALIC  be ESC + "[3m"
+let UNDER   be ESC + "[4m"
+
+let BLACK   be ESC + "[30m"
+let RED     be ESC + "[31m"
+let GREEN   be ESC + "[32m"
+let YELLOW  be ESC + "[33m"
+let BLUE    be ESC + "[34m"
+let MAGENTA be ESC + "[35m"
+let CYAN    be ESC + "[36m"
+let WHITE   be ESC + "[37m"
+
+# --- Cursor / screen control ---
+let CLEAR_SCREEN be ESC + "[2J" + ESC + "[H"      # clear + home
+let CLEAR_LINE   be ESC + "[2K" + ESC + "\r"      # clear current line + CR
+
+# --- A few useful Unicode glyphs (UTF-8 via chr of CODEPOINT) ---
+let HEART    be chr of 9829     # U+2665  ♥
+let DIAMOND  be chr of 9830     # U+2666  ♦
+let ARROW_R  be chr of 8594     # U+2192  →
+let CHECK    be chr of 10003    # U+2713  ✓
+let CROSS    be chr of 10007    # U+2717  ✗
+let STAR     be chr of 9733      # U+2605  ★
+
+say BOLD + "=== ANSI colors via chr of 27 ===" + RESET
+say ""
+say RED     + "red text"     + RESET
+say GREEN   + "green text"   + RESET
+say YELLOW  + "yellow text"  + RESET
+say BLUE    + "blue text"    + RESET
+say MAGENTA + "magenta text" + RESET
+say CYAN    + "cyan text"   + RESET
+say ""
+say BOLD    + "bold" + RESET + "  " + DIM + "dim" + RESET + "  " + ITALIC + "italic" + RESET + "  " + UNDER + "underline" + RESET
+say ""
+
+say BOLD + "=== Unicode via chr of CODEPOINT ===" + RESET
+say HEART    + "  heart"
+say DIAMOND  + "  diamond"
+say ARROW_R  + "  arrow"
+say CHECK    + "  check"
+say CROSS    + "  cross"
+say STAR     + "  star"
+say ""
+
+say BOLD + "=== ord of STR (reverse lookup) ===" + RESET
+say "ord of A   = " + to_string of (ord of "A")
+say "ord of ESC = " + to_string of (ord of ESC)
+say "ord of " + HEART + " = " + to_string of (ord of HEART)
+say ""
+
+say BOLD + "=== Composing styles ===" + RESET
+say RED + BOLD + "Red and bold" + RESET
+say GREEN + UNDER + "Green underline" + RESET
+say CYAN + BOLD + "Look " + RESET + CYAN + DIM + "how " + RESET + CYAN + "you " + RESET + CYAN + ITALIC + "can mix" + RESET
+say ""
+
+say BOLD + "=== Done ===" + RESET

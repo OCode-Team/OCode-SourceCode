@@ -1,0 +1,18 @@
+define square with n
+    return n * n
+end
+
+define factorial with n
+    if n is less than 2
+        return 1
+    end
+    return n * factorial with n - 1
+end
+
+define greet with name
+    say "Hello, " + name + "!"
+end
+
+say square with 6
+say factorial with 5
+greet with "World"

@@ -1,0 +1,36 @@
+# pyoc_data_science.oc — Use Python's data science stack from OCode
+# numpy and matplotlib are auto-installed from PyPI on first run.
+# OCode syntax (say, let, //) is auto-translated inside pyoc blocks.
+
+say "=== Loading numpy ==="
+
+pyoc
+import numpy as np
+
+// Create some data using OCode 'let'
+let x be np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+let y be x ** 2
+
+say "x = " + str(x)
+say "y = x^2 = " + str(y)
+let mean_y be y.mean()
+let std_y be y.std()
+say "Mean of y: " + str(round(mean_y, 2))
+say "Std of y:  " + str(round(std_y, 2))
+end
+
+say ""
+say "=== Computing statistics in a separate block ==="
+
+pyoc
+// numpy is still loaded, x and y still exist
+let correlation be np.corrcoef(x, y)[0, 1]
+say "Correlation between x and y: " + str(round(correlation, 4))
+
+// Linear regression
+let coeffs be np.polyfit(x, y, 1)
+print(f"Linear fit: y = {coeffs[0]:.2f}x + {coeffs[1]:.2f}")
+end
+
+say ""
+say "Done — numpy persisted across blocks, OCode syntax was auto-translated!"

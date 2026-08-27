@@ -1,0 +1,11 @@
+say "=== One-shot HTTPS via sslsay ==="
+let resp be sslsay "example.com" 443 "GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\nUser-Agent: OCode\r\n\r\n"
+say "got " + length of resp + " bytes"
+say slice resp from 0 to 80
+
+say ""
+say "=== One-shot WebSocket echo via wssay ==="
+let r1 be wssay "wss://ws.postman-echo.com/raw" "Hello from OCode!"
+say "echo 1: " + r1
+let r2 be wssay "wss://ws.postman-echo.com/raw" "Second one-shot message"
+say "echo 2: " + r2

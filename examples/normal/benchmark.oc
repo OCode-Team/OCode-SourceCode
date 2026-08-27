@@ -1,0 +1,93 @@
+# benchmark.oc — asks how many lines to simulate, then times OCode
+# running that many lines of mixed work.
+#
+# Usage:  ocode benchmark.oc
+#
+# The `ask` happens BEFORE the timer starts, so the user's thinking
+# time is NOT counted. Only the actual simulated work is timed.
+
+# --- ASK THE USER ---
+# Get a number from the user. ask returns a string, so we convert.
+say "============================================"
+say "  OCode Benchmark"
+say "============================================"
+say ""
+let input be ask "How many lines to simulate? "
+
+# Convert the input to a number. If the user typed garbage (e.g. "hello"),
+# the conversion throws — we catch that and fall back to a default.
+let N be 0
+try
+    let N be to_number of input
+catch ERR
+    say "Could not parse '" + input + "' as a number — using 1000 instead."
+    let N be 1000
+end
+
+# Sanity-check: if the number is 0 or negative, fall back to 1000.
+if N is less than 1
+    say "Using default of 1000 (your input was: " + to_string of N + ")"
+    let N be 1000
+end
+
+# --- START TIMER ---
+# (This is AFTER the ask, so the user's input time isn't counted.)
+let start be now
+
+# --- SIMULATE THE .oc FILE ---
+# Each iteration stands in for one line of a real .oc file. The mix of
+# operations below is representative of what a typical .oc program does:
+# math, conditionals, list append, dict insert/update with has-check,
+# string concatenation, and tracking a running max.
+
+let sum be 0
+let nums be []
+let counts be dict
+let built be ""
+let max_seen be 0
+
+for each i in range 1 to N
+    let x be floor of (random from 0 to 1000)
+    let sum be sum + x
+    add x to nums
+    if x is greater than max_seen
+        let max_seen be x
+    end
+    let key be to_string of x
+    if has key in counts
+        counts at key be (counts at key) + 1
+    else
+        counts at key be 1
+    end
+    let y be (x * x) mod 13
+    let sum be sum + y
+    let built be built + to_string of x + ","
+end
+
+let count_unique be length of (keys of counts)
+let list_len be length of nums
+
+# --- STOP TIMER ---
+let finish be now
+let elapsed be finish - start
+
+# --- CLEAR SCREEN ---
+# ESC + "[2J" clears the whole screen, ESC + "[H" moves cursor home.
+let ESC be chr of 27
+say_inline ESC + "[2J" + ESC + "[H"
+
+# --- SHOW RESULTS ---
+say "============================================"
+say "  OCode Benchmark — Complete"
+say "============================================"
+say ""
+say "Lines simulated:    " + to_string of N
+say "List length:        " + to_string of list_len
+say "Unique dict keys:   " + to_string of count_unique
+say "Max value seen:     " + to_string of max_seen
+say "Sum of all values:  " + to_string of sum
+say ""
+say "--------------------------------------------"
+say "Time:           " + to_string of elapsed + " seconds"
+say "Lines/sec:      " + to_string of (N / elapsed)
+say "--------------------------------------------"

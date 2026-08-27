@@ -1,0 +1,9 @@
+# This is a hash comment
+say "hi"  // this is also a comment
+
+define square with n
+    # comments work inside functions too
+    return n * n  // trailing comment
+end
+
+say square with 4

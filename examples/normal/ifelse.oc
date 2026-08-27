@@ -1,0 +1,23 @@
+# if / else if / else
+let score be 85
+
+if score >= 90
+    say "A"
+else if score >= 80
+    say "B"
+else if score >= 70
+    say "C"
+else
+    say "below C"
+end
+
+# word forms still work
+let x be 10
+if x is greater than 5 and x is less than 20
+    say "x is between 5 and 20"
+end
+
+# not equal
+if x is not equal to 99
+    say "x is not 99"
+end

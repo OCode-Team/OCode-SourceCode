@@ -1,0 +1,9 @@
+# hello.oc — your first OCode program
+say "hello world"
+
+let x be 5
+let y be 10
+say x plus y
+say x * y
+let z be x + y * 2
+say z

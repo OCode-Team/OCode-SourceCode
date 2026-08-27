@@ -1,0 +1,29 @@
+# strings.oc - string operations
+
+let greeting be "  Hello World  "
+
+say uppercase of greeting        # "  HELLO WORLD  "
+say lowercase of greeting        # "  hello world  "
+say trim of greeting             # "Hello World"
+say length of greeting           # 16
+
+# split and join
+let csv be "one,two,three"
+let words be split csv by ","
+say words at 1                   # two
+say join words by " - "        # one - two - three
+
+# contains
+let sentence be "hello world"
+say contains sentence "world"    # true
+say contains sentence "xyz"      # false
+
+# replace
+let s be "I like cats"
+say replace in s from "cats" to "dogs"
+
+# index of  (returns -1 if not found)
+say index of "o" in "hello world"   # 4
+
+# slice
+say slice "hello world" from 6 to 11   # world

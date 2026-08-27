@@ -1,0 +1,139 @@
+say "=== Bitwise (3.7) ==="
+say "band 12 10 = " + (band 12 10)
+say "bor 12 10 = " + (bor 12 10)
+say "bxor 12 10 = " + (bxor 12 10)
+say "bnot 0 = " + (bnot 0)
+say "bshl 1 8 = " + (bshl 1 8)
+say "bshr 256 2 = " + (bshr 256 2)
+
+say ""
+say "=== Math extras (3.8) ==="
+say "sign of -5 = " + (sign of (0 - 5))
+say "gcd of 24 and 36 = " + (gcd of 24 and 36)
+say "lcm of 4 and 6 = " + (lcm of 4 and 6)
+say "trunc of 3.9 = " + (trunc of 3.9)
+say "clamp 15 between 0 and 10 = " + (clamp 15 between 0 and 10)
+say "popcount of 255 = " + (popcount of 255)
+say "bit_length of 255 = " + (bit_length of 255)
+
+say ""
+say "=== BigInt (3.7/3.8) ==="
+say "bigint 12345678901234567890 = " + (bigint "12345678901234567890")
+say "bigint_add \"999999999999999\" \"1\" = " + (bigint_add "999999999999999" "1")
+say "bigint_mul \"99999\" \"99999\" = " + (bigint_mul "99999" "99999")
+say "bigint_to_hex of 255 = " + (bigint_to_hex of "255")
+say "bigint_from_hex of \"ff\" = " + (bigint_from_hex of "ff")
+
+say ""
+say "=== String extras (3.9) ==="
+say "starts_with \"hello\" with \"he\" = " + (starts_with "hello" with "he")
+say "ends_with \"hello\" with \"lo\" = " + (ends_with "hello" with "lo")
+say "count \"a-b-a\" with \"a\" = " + (count "a-b-a" with "a")
+say "pad_left \"5\" to 3 with \"0\" = " + (pad_left "5" to 3 with "0")
+say "pad_right \"5\" to 3 with \"-\" = " + (pad_right "5" to 3 with "-")
+say "capitalize of \"hello world\" = " + (capitalize of "hello world")
+say "title_case of \"hello world\" = " + (title_case of "hello world")
+say "replace_all \"a-b-c\" from \"-\" with \"/\" = " + (replace_all "a-b-c" from "-" with "/")
+
+say ""
+say "=== List extras (3.10) ==="
+let nums be [1, 2, 3, 4, 5]
+say "sum_of = " + (sum_of nums)
+say "product_of = " + (product_of nums)
+say "min_of = " + (min_of nums)
+say "max_of = " + (max_of nums)
+say "unique of [1,1,2,2,3,3] = " + (unique of [1,1,2,2,3,3])
+say "flatten of [[1,2],[3,4]] = " + (flatten of [[1,2],[3,4]])
+say "chunk [1,2,3,4,5] into 2 = " + (chunk [1,2,3,4,5] into 2)
+say "zip [1,2,3] with [4,5,6] = " + (zip [1,2,3] with [4,5,6])
+say "list_contains 3 in [1,2,3] = " + (list_contains 3 in [1,2,3])
+say "count_of 2 in [1,2,2,3] = " + (count_of 2 in [1,2,2,3])
+
+say ""
+say "=== Dict extras (3.11) ==="
+let d be dict "a" is 1, "b" is 2, "c" is 3
+say "values of d = " + (values of d)
+say "items of d = " + (items of d)
+let merged be merge d with dict "c" is 99, "d" is 100
+say "merged d with {c:99, d:100}: " + merged
+
+say ""
+say "=== Type introspection (3.12) ==="
+say "type_of 42 = " + (type_of 42)
+say "type_of \"hi\" = " + (type_of "hi")
+say "type_of [1,2,3] = " + (type_of [1,2,3])
+say "is_dict of {a:1} = " + (is_dict of (dict "a" is 1))
+say "is_empty of [] = " + (is_empty of [])
+say "is_empty of \"\" = " + (is_empty of "")
+
+say ""
+say "=== Time extras (3.13) ==="
+say "date_now = " + (date_now)
+say "date_to_iso of now = " + (date_to_iso of now)
+say "date_from_iso of \"2026-01-01T00:00:00Z\" = " + (date_from_iso of "2026-01-01T00:00:00Z")
+let t be timer_start "test"
+say "timer_stop test (ms) = " + (timer_stop "test")
+
+say ""
+say "=== File I/O extras (3.14) ==="
+say "cwd = " + (cwd)
+write "test.txt" with "hello"
+say "is_file test.txt = " + (is_file "test.txt")
+say "is_dir . = " + (is_dir ".")
+say "copy_file test.txt to copy.txt = " + (copy_file "test.txt" to "copy.txt")
+say "stat test.txt: " + (stat "test.txt")
+say "glob of \"*.txt\" = " + (glob of "*.txt")
+rm "test.txt"
+rm "copy.txt"
+
+say ""
+say "=== System (3.17) ==="
+say "platform = " + (platform)
+say "pid = " + (pid)
+say "hostname = " + (hostname)
+say "env of \"HOME\" = " + (env of "HOME")
+say "uptime = " + (uptime)
+
+say ""
+say "=== Random extras (3.18) ==="
+random_seed 42
+say "random_int 1 to 6 = " + (random_int from 1 to 6)
+say "random_choice of [a,b,c] = " + (random_choice of ["a","b","c"])
+
+say ""
+say "=== Encoding (3.22) ==="
+say "encode_base64 of hello = " + (encode_base64 of "hello")
+say "decode_base64 of \"aGVsbG8=\" = " + (decode_base64 of "aGVsbG8=")
+say "hash_sha256 of hello = " + (hash_sha256 of "hello")
+say "hash_md5 of hello = " + (hash_md5 of "hello")
+say "url_encode of \"hi there\" = " + (url_encode of "hi there")
+say "url_decode of \"hi%20there\" = " + (url_decode of "hi%20there")
+
+say ""
+say "=== Saved vars (3.23) ==="
+say "save_var high_score 9000 = " + (save_var "high_score" with 9000)
+say "load_var high_score = " + (load_var "high_score")
+say "saved_vars = " + (saved_vars)
+clear_saved_var "high_score"
+say "after clear, saved_vars = " + (saved_vars)
+
+say ""
+say "=== Errors (3.21) ==="
+try
+    raise "test error" with 42
+catch e
+    say "caught error: " + (error_message) + " code " + (error_code)
+end
+
+say ""
+say "=== SQLite (3.7) ==="
+let db be db_open ":memory:"
+db_exec db with "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)"
+db_exec db with "INSERT INTO users (name) VALUES ('Alice')"
+db_exec db with "INSERT INTO users (name) VALUES ('Bob')"
+let rows be db_query db with "SELECT * FROM users"
+say "rows = " + rows
+db_close db
+
+say ""
+say "=== ALL TESTS PASSED ==="
